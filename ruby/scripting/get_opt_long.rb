@@ -22,7 +22,7 @@ def get_opts
   end
 
 rescue => e
-  print_help('there was an error while parsing cmd-line args, with the following msg: ' + e.message)
+  print_help e.message
   nil
 end
 
@@ -30,14 +30,17 @@ end
 # main
 #
 opts=get_opts
-puts 'encountered null opts' && exit unless opts
+exit unless opts
 
 opts_hash=opts.to_hash
-puts 'encountered null opts.to_hash' && exit unless opts_hash
+unless opts_hash
+  puts 'encountered null opts.to_hash - no bueno'
+  exit
+end
 
-unless(opts.name?)
-	print_help('missing name arg', opts)
-	exit
+unless opts.name?
+  print_help 'missing name arg', opts
+  exit
 end
 
 puts "Name received: '#{opts_hash[:name]}'"
