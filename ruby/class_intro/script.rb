@@ -1,4 +1,4 @@
-#!/home/amirk/.rvm/rubies/ruby-1.9.3-p194/bin/ruby
+#!/bin/ruby
 
 # w/o the ./ in the front of foo.rb, this doesn't work ...
 require './foo.rb'
