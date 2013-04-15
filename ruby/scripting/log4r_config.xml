@@ -1,0 +1,32 @@
+<!-- ripped this off from the examples in your log4r distribution, here:
+/.rvm/gems/ruby-1.9.3-p194/gems/log4r-1.1.10/examples/moderate.xml et al.
+-->
+<log4r_config>
+  <pre_config>
+    <custom_levels>
+      DEBUG, INFO, WARN, ERROR, FATAL
+    </custom_levels>
+    <global level="ALL" />
+  </pre_config>
+  
+  <!-- you have to set the 'logpath' variable at runtime like so,
+  before you load the xml file:
+  Configurator['logpath']="path/to/output"
+  -->
+  <outputter type="RollingFileOutputter" name="appLoggerOutputter" 
+             filename="#{logpath}/appLogger.log"/>
+  
+  <!-- you can get/use this logger in your app like so:
+  var logger = Logger["foologger"] 
+  - additive: affects the cascading settings from the parent logger
+  - level: duh
+  - trace: will it log trace data, like line number? slows things down a little if true
+  -->
+  <logger name="foologger" level="ALL" additive="false" trace="true">
+		<outputter>console</outputter>
+	</logger>
+  
+  <logger name="appLogger" level="ALL" additive="false" trace="true">
+		<outputter>appLoggerOutputter</outputter>
+	</logger>
+</log4r_config>
