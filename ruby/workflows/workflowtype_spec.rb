@@ -1,9 +1,17 @@
 
 require './workflowtype.rb'
+# require_relative ..?
 
-# how does 'context' fit into shit?
-# what's a good website to go to for the various equality tests/methods
-
+# the standard matchers are documented nicely on rspec's site, here:
+# http://rubydoc.info/gems/rspec-expectations/frames
+#
+# run it like so:
+# rspec workflowtype_spec.rb
+#
+# alternatively, with pretty output:
+# rspec -f documentation workflowtype_spec.rb
+# or, shorter:
+# rspec -f d workflowtype_spec.rb
 describe Workflowtype do
 
 	describe "#new" do
@@ -12,7 +20,6 @@ describe Workflowtype do
 		# end
 
 		context 'without any ctor attribs' do
-			# or this to run stuff before each test one by one
 			before :each do 
 				@wt=Workflowtype.new
 			end
@@ -29,7 +36,7 @@ describe Workflowtype do
 
 		context 'with an id ctor attribute' do
 			before :each do
-				@wt=Workflowtype.new({:id => 5})
+				@wt=Workflowtype.new(:id => 5)
 			end
 
 			it 'has a non-nil id' do
@@ -43,7 +50,7 @@ describe Workflowtype do
 
 		context 'with a name ctor attribute' do
 			before :each do
-				@wt = Workflowtype.new({:name => "foo!"})
+				@wt = Workflowtype.new(:name => "foo!")
 			end
 
 			it 'has a non-nil name' do
