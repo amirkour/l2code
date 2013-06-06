@@ -1,5 +1,6 @@
 
 require './workflowtype.rb'
+require 'json'
 # require_relative ..?
 
 # the standard matchers are documented nicely on rspec's site, here:
@@ -62,6 +63,45 @@ describe Workflowtype do
 			end
 		end
 
-	end# end of #new
+		context 'with a random, unsupported attribute' do
+			it 'has no effect' do
+				wt=Workflowtype.new(:random => 'bla')
+				wt.id.should be_nil
+				wt.name.should be_nil
+			end
+		end
+
+	end# new
+
+	describe '#to_json' do
+		context 'on an object without attributes' do
+			before :each do
+				@wt=Workflowtype.new
+			end
+
+			it 'returns a string' do
+				@wt.to_json.should be_an_instance_of(String)
+			end
+
+			it 'returns a string parsable by the json library' do
+				expect { JSON.parse(@wt.to_json) }.to_not raise_error
+			end
+		end
+		context 'on an object with attributes' do
+			before :each do
+				@wt=Workflowtype.new(:id => 5, :name=>'mumble')
+			end
+
+			it 'returns a string' do
+				@wt.to_json.should be_an_instance_of(String)
+			end
+
+			it 'returns a string parsable by the json library' do
+				expect { JSON.parse(@wt.to_json) }.to_not raise_error
+			end
+		end
+	end# to_json
+
+	
 
 end
