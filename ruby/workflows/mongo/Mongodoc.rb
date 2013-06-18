@@ -2,15 +2,20 @@ require 'mongo'
 include Mongo
 
 class Mongodoc
-	@DEFAULT_HOST='localhost'
-	@DEFAULT_PORT=27017
+	@HOST='localhost'
+	@PORT=27017
 	class << self
-		attr_reader :DEFAULT_PORT, :DEFAULT_HOST
+		attr_reader :PORT, :HOST
+
+		def configure(options = {})
+			@HOST = options[:host] || @HOST
+			@PORT = options[:port] || @PORT
+		end
 	end
 
 	def client(options = {}, &block)
-		host=options[:host] || Mongodoc.DEFAULT_HOST
-		port=options[:port] || Mongodoc.DEFAULT_PORT
+		host=options[:host] || Mongodoc.HOST
+		port=options[:port] || Mongodoc.PORT
 
 		client=MongoClient.new(host,port)
 
