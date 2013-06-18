@@ -4,12 +4,14 @@ include Mongo
 class Mongodoc
 	@HOST='localhost'
 	@PORT=27017
+	@DB='test'
 	class << self
-		attr_reader :PORT, :HOST
+		attr_reader :PORT, :HOST, :DB
 
 		def configure(options = {})
 			@HOST = options[:host] || @HOST
 			@PORT = options[:port] || @PORT
+			@DB = options[:db] || @DB
 		end
 	end
 
@@ -26,4 +28,6 @@ class Mongodoc
 			client.close
 		end
 	end
+
+	
 end

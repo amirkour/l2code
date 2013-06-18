@@ -16,18 +16,21 @@ include Mongo
 # rspec -f d Mongodoc.rb
 describe Mongodoc do
 	describe 'Mongodoc.configure' do
-		it 'sets the host and port' do
+		it 'sets the host and port and db' do
 			default_host=Mongodoc.HOST
 			default_port=Mongodoc.PORT
+			default_db=Mongodoc.DB
 
 			host='foo'
 			port=1234
-			Mongodoc.configure({:host => host, :port => port})
+			db='nonexistent'
+			Mongodoc.configure({:host => host, :port => port, :db => db})
 			Mongodoc.HOST.should == host
 			Mongodoc.PORT.should == port
+			Mongodoc.DB.should == db
 
-			# set back to defaults - remainder of specs in this file depend on default host/port
-			Mongodoc.configure({:host => default_host, :port => default_port})
+			# set back to defaults - remainder of specs in this file depend on default host/port/db
+			Mongodoc.configure({:host => default_host, :port => default_port, :db => db})
 		end
 	end
 
@@ -40,6 +43,12 @@ describe Mongodoc do
 	describe 'Mongodoc.PORT' do
 		it 'cannot be assigned to' do
 			expect { Mongodoc.PORT=1}.to raise_error
+		end
+	end
+
+	describe 'Mongodoc.DB' do
+		it 'cannot be assigned to' do
+			expect { Mongodoc.DB='hi'}.to raise_error
 		end
 	end
 
