@@ -15,7 +15,7 @@ include Mongo
 # or, shorter:
 # rspec -f d Mongodoc.rb
 describe Mongodoc do
-	describe 'Mongodoc.configure' do
+	describe '::configure' do
 		it 'sets the host and port and db' do
 			default_host=Mongodoc.HOST
 			default_port=Mongodoc.PORT
@@ -34,39 +34,38 @@ describe Mongodoc do
 		end
 	end
 
-	describe 'Mongodoc.HOST' do
+	describe '::HOST' do
 		it 'cannot be assigned to' do
 			expect { Mongodoc.HOST='hi there'}.to raise_error
 		end
 	end
 
-	describe 'Mongodoc.PORT' do
+	describe '::PORT' do
 		it 'cannot be assigned to' do
 			expect { Mongodoc.PORT=1}.to raise_error
 		end
 	end
 
-	describe 'Mongodoc.DB' do
+	describe '::DB' do
 		it 'cannot be assigned to' do
 			expect { Mongodoc.DB='hi'}.to raise_error
 		end
 	end
 
-	describe '#new' do
-		before :each do 
-			@doc=Mongodoc.new
-		end
-		it 'creates an object that is_a Mongodoc' do
-			@doc.should be_an_instance_of(Mongodoc)
-		end
-	end
+	# describe '#new' do
+	# 	before :each do 
+	# 		@doc=Mongodoc.new
+	# 	end
+	# 	it 'creates an object that is_a Mongodoc' do
+	# 		@doc.should be_an_instance_of(Mongodoc)
+	# 	end
+	# end
 
-	describe '#client' do
+	describe '::client' do
 		describe 'without configuration options' do
 			context 'without a block' do
 				before :each do
-					@wt=Mongodoc.new
-					@client=@wt.client
+					@client=Mongodoc.client
 				end
 				after :each do
 					@client.close
@@ -87,24 +86,20 @@ describe Mongodoc do
 			end
 
 			context 'with a block' do
-				before :each do
-					@wt=Mongodoc.new
-				end
 
 				it 'should yield' do
 
 					# block should yield, passing an argument of type Mongo::MongoClient into the block
-					expect {|b| @wt.client(&b) }.to yield_with_args(MongoClient)
+					expect {|b| Mongodoc.client(&b) }.to yield_with_args(MongoClient)
 				end
 			end
 		end
 		describe 'with configuration options' do
 			context 'without a block' do
 				before :each do
-					@wt=Mongodoc.new
 					@host="127.0.0.1"
 					@port=27017
-					@client=@wt.client({:host => @host,:port => @port})
+					@client=Mongodoc.client({:host => @host,:port => @port})
 				end
 				after :each do
 					@client.close
@@ -116,7 +111,7 @@ describe Mongodoc do
 				end
 
 				it "returns a connection talking to host #{@host}" do
-					@client.host.should == "#{@host}"
+					@client.host.should == @host
 				end
 
 				it "returns a connection talking on port #{@port}" do
@@ -126,7 +121,6 @@ describe Mongodoc do
 
 			context 'with a block' do
 				before :each do
-					@wt=Mongodoc.new
 					@host="127.0.0.1"
 					@port=27017
 				end
@@ -134,7 +128,7 @@ describe Mongodoc do
 				it 'should yield' do
 
 					# block should yield, passing an argument of type Mongo::MongoClient into the block
-					expect {|b| @wt.client({:host => @host,:port => @port}, &b) }.to yield_with_args(MongoClient)
+					expect {|b| Mongodoc.client({:host => @host,:port => @port}, &b) }.to yield_with_args(MongoClient)
 				end
 			end
 		end

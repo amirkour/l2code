@@ -13,21 +13,19 @@ class Mongodoc
 			@PORT = options[:port] || @PORT
 			@DB = options[:db] || @DB
 		end
-	end
 
-	def client(options = {}, &block)
-		host=options[:host] || Mongodoc.HOST
-		port=options[:port] || Mongodoc.PORT
+		def client(options = {}, &block)
+			host=options[:host] || Mongodoc.HOST
+			port=options[:port] || Mongodoc.PORT
 
-		client=MongoClient.new(host,port)
+			client=MongoClient.new(host,port)
 
-		return client unless block
-		begin
-			block.call(client)
-		ensure
-			client.close
+			return client unless block
+			begin
+				block.call(client)
+			ensure
+				client.close
+			end
 		end
 	end
-
-	
 end
