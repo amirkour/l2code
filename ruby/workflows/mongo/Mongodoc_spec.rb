@@ -30,7 +30,7 @@ describe Mongodoc do
 			Mongodoc.DB.should == db
 
 			# set back to defaults - remainder of specs in this file depend on default host/port/db
-			Mongodoc.configure({:host => default_host, :port => default_port, :db => db})
+			Mongodoc.configure({:host => default_host, :port => default_port, :db => default_db})
 		end
 	end
 
@@ -133,4 +133,75 @@ describe Mongodoc do
 			end
 		end
 	end# #client
+	describe "::db_name_valid?" do
+		it "returns false for 'test' db" do
+			Mongodoc.db_name_valid?('test').should be_false
+		end
+		it "returns false for 'tests' db" do
+			Mongodoc.db_name_valid?('tests').should be_false
+		end
+		it "returns false for a non-string arg" do
+			Mongodoc.db_name_valid?(1).should be_false
+		end
+		it "returns true for anything non-nil that's not a test db" do
+			Mongodoc.db_name_valid?('foo').should be_true
+		end
+		it "returns false for nil" do
+			Mongodoc.db_name_valid?(nil).should be_false
+		end
+	end
+	describe "::db" do
+		context 'without having configured DB setting' do
+			it "should raise an error" do
+				expect { Mongodoc.db }.to raise_error
+			end
+		end
+		context 'with configured DB setting, without DB arg' do
+			before :all do
+				@default_db=Mongodoc.DB
+				@new_db='workflows'
+				Mongodoc.configure({:db => @new_db})
+			end
+			after :all do
+				Mongodoc.configure({:db => @default_db})
+			end
+			it 'should be an instance of Mongo::DB' do
+				Mongodoc.db.should be_an_instance_of(Mongo::DB)
+			end
+			it "should be pointed at the #{@new_db} database" do
+				Mongodoc.db.name.should == @new_db
+			end
+			it "should yield with a block" do
+				expect {|b| Mongodoc.db({}, &b) }.to yield_with_args(Mongo::DB)
+			end
+		end
+		context "with db arg" do
+			it "should barf if the arg is 'test'" do
+				expect { Mongodoc.db('test') }.to raise_error
+			end
+			it "should be an instance of Mongo::DB" do
+				Mongodoc.db({:db => 'foo'}).should be_an_instance_of(Mongo::DB)
+			end
+			it "should be pointed at the 'foo' database" do
+				Mongodoc.db({:db => 'foo'}).name.should == 'foo'
+			end
+			it "should yield with a block" do
+				expect {|b| Mongodoc.db({:db => 'foo'}, &b) }.to yield_with_args(Mongo::DB)
+			end
+		end
+	end
+
+	# describe '::get_all' do
+	# 	context 'without a db set' do
+	# 		it 'should throw an error' do
+	# 			expect { Mongodoc.get_all }.to raise_error
+	# 		end
+	# 	end
+	# 	context 'with a db set to something nonexistent' do
+	# 		it 'should return nil' do
+	# 			Mongodoc.configure({:db => 'nonexistent db'})
+	# 			Mongodoc.get_all.should be_nil
+	# 		end
+	# 	end
+	# end
 end
