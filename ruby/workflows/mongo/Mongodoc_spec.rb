@@ -64,10 +64,10 @@ describe Mongodoc do
 	describe '::client' do
 		describe 'without configuration options' do
 			context 'without a block' do
-				before :each do
+				before :all do
 					@client=Mongodoc.client
 				end
-				after :each do
+				after :all do
 					@client.close
 				end
 
@@ -96,12 +96,12 @@ describe Mongodoc do
 		end
 		describe 'with configuration options' do
 			context 'without a block' do
-				before :each do
+				before :all do
 					@host="127.0.0.1"
 					@port=27017
 					@client=Mongodoc.client({:host => @host,:port => @port})
 				end
-				after :each do
+				after :all do
 					@client.close
 				end
 
@@ -120,7 +120,7 @@ describe Mongodoc do
 			end
 
 			context 'with a block' do
-				before :each do
+				before :all do
 					@host="127.0.0.1"
 					@port=27017
 				end
@@ -190,17 +190,77 @@ describe Mongodoc do
 			end
 		end
 	end
+	describe "::collection" do
+		before :all do
+			@db_test='mongodoc_test_db'
+			@collection_fake='foo_bar_baz'
+			@collection_test='test_workflows'
+			Mongodoc.configure({:db => @db_test})
+			Mongodoc.db do |db|
+				db[@collection_test].insert({:foo => 'bar'})
+			end
+		end
+		after :all do
+			Mongodoc.client do |client|
+				client.drop_database(@db_test)
+			end
+		end
+		it "raises an error without a collection name" do
+			expect{Mongodoc.collection}.to raise_error
+		end
+		it "returns an object of type Mongo::Collection for fake collection #{@collection_fake}" do
+			Mongodoc.collection(:collection => @collection_fake).should be_an_instance_of(Mongo::Collection)
+		end
+		it "returns an object of type Mongo::Collection for test collection #{@collection_test}" do
+			Mongodoc.collection(:collection => @collection_test).should be_an_instance_of(Mongo::Collection)
+		end
+		it "returns a non-empty collection for test collection #{@collection_test}" do
+			expect(Mongodoc.collection(:collection => @collection_test).count).to be > 0 
+		end
+		it "should yield with a block" do
+			expect { |b| Mongodoc.collection(:collection => 'mumble', &b) }.to yield_with_args(Mongo::Collection)
+		end
+	end
 
-	# describe '::get_all' do
-	# 	context 'without a db set' do
-	# 		it 'should throw an error' do
-	# 			expect { Mongodoc.get_all }.to raise_error
+	# describe "crud operations" do
+	# 	before :all do
+	# 		@db_test='mongodoc_test_db'
+	# 		@collection_fake='foo_bar_baz'
+	# 		@collection_test='test_workflows'
+
+	# 		Mongodoc.configure({:db => @db_test})
+	# 		Mongodoc.db do |db|
+	# 			db[@collection_test].insert({:foo => 'bar'})
 	# 		end
 	# 	end
-	# 	context 'with a db set to something nonexistent' do
-	# 		it 'should return nil' do
-	# 			Mongodoc.configure({:db => 'nonexistent db'})
-	# 			Mongodoc.get_all.should be_nil
+	# 	after :all do
+	# 		Mongodoc.client do |client|
+	# 			client.drop_database(@db_test)
+	# 		end
+	# 	end
+
+	# 	describe "::get_paged" do
+	# 		context "for non-existing collection" do
+	# 			before :all do
+	# 				Mongodoc.stub(:collection => @collection_fake)
+	# 			end
+
+	# 			it "gets nil" do
+	# 				items=Mongodoc.get_paged
+	# 				items.should be_nil
+	# 			end
+	# 		end
+
+	# 		context "for existing collection" do
+	# 			before :all do
+	# 				Mongodoc.stub(:collection => @collection_test)
+	# 			end
+				
+	# 			it "gets a page of items by default" do
+	# 				items=Mongodoc.get_paged
+	# 				items.should_not be_nil
+	# 				items.empty?.should be_false
+	# 			end
 	# 		end
 	# 	end
 	# end
