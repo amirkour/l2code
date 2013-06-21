@@ -128,6 +128,27 @@ class Mongodoc
 			results
 		end
 
+		def get_with_id_string(options={})
+			db_host=options[:host] || Mongodoc.HOST
+			db_port=options[:port] || Mongodoc.PORT
+			db_name=options[:db] || Mongodoc.DB
+			collection_name=options[:collection]#bugbug - collection should default internally..?
+			id=options[:_id]
+			raise "Missing required :_id options parameter" unless id
+			col=Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name)
+			col.find_one(:_id => BSON.ObjectId(id))
+		end
+
+		def get_with_bson(options={})
+			db_host=options[:host] || Mongodoc.HOST
+			db_port=options[:port] || Mongodoc.PORT
+			db_name=options[:db] || Mongodoc.DB
+			collection_name=options[:collection]#bugbug - collection should default internally..?
+			id=options[:_id]
+			raise "Missing required :_id options parameter" unless id
+			col=Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name)
+			col.find_one(:_id => id)
+		end
 
 	end#end of class
 end

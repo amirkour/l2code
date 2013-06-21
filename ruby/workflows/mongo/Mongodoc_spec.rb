@@ -278,5 +278,54 @@ describe Mongodoc do
 				end
 			end
 		end# get_paged
+		describe "get by id string" do
+			before :all do
+				@raw_item=@col.find.next
+				@id_str=@raw_item['_id'].to_s
+			end
+			it "throws an error with anything that's not a valid bson string" do
+				expect{Mongodoc.get_with_id_string(:collection=>@col_name, :_id=>nil)}.to raise_error
+				expect{Mongodoc.get_with_id_string(:collection=>@col_name, :_id=>'hi')}.to raise_error
+				expect{Mongodoc.get_with_id_string(:collection=>@col_name, :_id=>[])}.to raise_error
+			end
+			it "returns a raw hash back with a valid bson string that exists" do
+				raw_hash=Mongodoc.get_with_id_string(:collection=>@col_name, :_id=>@id_str)
+				expect(raw_hash).to eql(@raw_item)
+			end
+			it "returns nil for a valid bson string that doesn't exist" do
+				raw_hash=Mongodoc.get_with_id_string(:collection=>@col_name, :_id=>@id_str.reverse)
+				expect(raw_hash).to be_nil
+			end
+			it "returns nil for an invalid collection name" do
+				raw_hash=Mongodoc.get_with_id_string(:collection=>'mumble', :_id=>@id_str)
+				expect(raw_hash).to be_nil
+			end
+		end
+		describe "get by bson id object" do
+			before :all do
+				@raw_item=@col.find.next
+				@bson=@raw_item['_id']
+			end
+			it "throws an error with nil id" do
+				expect{Mongodoc.get_with_bson(:collection=>@col_name, :_id=>nil)}.to raise_error
+			end
+			it "does not throw an error with random, non-nil objects" do
+				expect{Mongodoc.get_with_bson(:collection=>@col_name, :_id=>'hi')}.to_not raise_error
+				expect{Mongodoc.get_with_bson(:collection=>@col_name, :_id=>[])}.to_not raise_error
+			end
+			it "returns a raw hash back with a valid bson object that exists" do
+				raw_hash=Mongodoc.get_with_bson(:collection=>@col_name, :_id=>@bson)
+				expect(raw_hash).to eql(@raw_item)
+			end
+			it "returns nil for a valid bson that doesn't exist" do
+				bson=BSON.ObjectId(@bson.to_s.reverse)
+				raw_hash=Mongodoc.get_with_bson(:collection=>@col_name, :_id=>bson)
+				expect(raw_hash).to be_nil
+			end
+			it "returns nil for an invalid collection name" do
+				raw_hash=Mongodoc.get_with_bson(:collection=>'mumble', :_id=>@bson)
+				expect(raw_hash).to be_nil
+			end
+		end
 	end# crud operations
 end
