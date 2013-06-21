@@ -151,11 +151,6 @@ describe Mongodoc do
 		end
 	end
 	describe "::db" do
-		context 'without having configured DB setting' do
-			it "should raise an error" do
-				expect { Mongodoc.db }.to raise_error
-			end
-		end
 		context 'with configured DB setting, without DB arg' do
 			before :all do
 				@default_db=Mongodoc.DB
@@ -222,46 +217,66 @@ describe Mongodoc do
 		end
 	end
 
-	# describe "crud operations" do
-	# 	before :all do
-	# 		@db_test='mongodoc_test_db'
-	# 		@collection_fake='foo_bar_baz'
-	# 		@collection_test='test_workflows'
+	describe "crud operations" do
+		before :all do
+			Mongodoc.configure(:db => 'mongodoc_test_db')
+			@col_name='test'
 
-	# 		Mongodoc.configure({:db => @db_test})
-	# 		Mongodoc.db do |db|
-	# 			db[@collection_test].insert({:foo => 'bar'})
-	# 		end
-	# 	end
-	# 	after :all do
-	# 		Mongodoc.client do |client|
-	# 			client.drop_database(@db_test)
-	# 		end
-	# 	end
+			@col=Mongodoc.collection(:collection => @col_name)
+			250.times{ |i| @col.insert( {:name=>"foo#{i}", :value=>i} ) }
+		end
+		after :all do
+			@col.db.connection.drop_database(@col.db.name)
+		end
+		describe "::get_paged" do
+			before :all do
+				@page_size=10
+				@anchor=:value
+			end
+			describe "fail cases" do
+				it "fails without an anchor default hash" do
+					expect{Mongodoc.get_paged(:page_size=>@page_size, :collection=>@col_name, :anchor=>@anchor)}.to raise_error
+				end
+				describe "with an anchor default hash" do
+					before :each do
+						Mongodoc.stub(:get_anchor_default => 0)
+					end
+					context "on a nonexisting collection" do
+						it "returns an empty list" do
+							list=Mongodoc.get_paged(:page_size=>@page_size, :collection=>'bla', :anchor=>@anchor)
+							expect(list).to_not be_nil
+							expect(list.count).to eq(0)
+						end
+					end
+				end
+			end
+			describe "pass cases" do
+				before :each do
+					Mongodoc.stub(:get_anchor_default => 0)
+				end
+				context "on an existing collection with items in it" do
+					it "returns a non empty list" do
+						list=Mongodoc.get_paged(:page_size=>@page_size, :collection=>@col_name, :anchor=>@anchor)
+						expect(list).to_not be_nil
+						expect(list).to be_a_kind_of(Enumerable)
+						expect(list).to be_an_instance_of(Array)
+						expect(list.count).to be > 0
+					end
+					it "pages correctly" do
+						page_one=Mongodoc.get_paged(:page_size=>@page_size, :collection=>@col_name, :anchor=>@anchor)
 
-	# 	describe "::get_paged" do
-	# 		context "for non-existing collection" do
-	# 			before :all do
-	# 				Mongodoc.stub(:collection => @collection_fake)
-	# 			end
-
-	# 			it "gets nil" do
-	# 				items=Mongodoc.get_paged
-	# 				items.should be_nil
-	# 			end
-	# 		end
-
-	# 		context "for existing collection" do
-	# 			before :all do
-	# 				Mongodoc.stub(:collection => @collection_test)
-	# 			end
-				
-	# 			it "gets a page of items by default" do
-	# 				items=Mongodoc.get_paged
-	# 				items.should_not be_nil
-	# 				items.empty?.should be_false
-	# 			end
-	# 		end
-	# 	end
-	# end
+						# assuming page size of 3, the starting anchor for the second page is this:
+						#     |
+						#     | this one
+						#     v
+						# [ x y z ]
+						#
+						# because you expect z to be the first element of the second page (after having shrunk the pgae size by 1!)
+						page_two=Mongodoc.get_paged(:page_size=>(@page_size-1), :collection=>@col_name, :anchor=>@anchor, :anchor_start=>page_one[page_one.length-2][@anchor.to_s])
+						expect(page_one.last).to eq(page_two.first)
+					end
+				end
+			end
+		end# get_paged
+	end# crud operations
 end
