@@ -117,14 +117,16 @@ class Mongodoc
 			# of the previous page
 			equivalency_symbol = start_value_for_anchor.equal?(get_anchor_default(anchor)) ? :$gte : :$gt
 
-			col=Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name)
-
-			# col.find({:value=>{:$gte=>30}}, {:limit=>20,:sort=>{:value=>:asc}}).each{|x| puts x}
-			cursor=col.find( { anchor => { equivalency_symbol => start_value_for_anchor } }, { :limit => page_size, :sort => { anchor => asc_or_desc } } )
-			
-			#BUGBUG - this should return the actual subclass type
+			#BUGBUG - this should return the actual subclass type, or maybe a generic subclass (which all concretes
+			#	descne from) will handle the casting/converting for you..?
 			results=[]
-			cursor.each{|x| results << x}
+			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+
+				# col.find({:value=>{:$gte=>30}}, {:limit=>20,:sort=>{:value=>:asc}}).each{|x| puts x}
+				cursor=col.find( { anchor => { equivalency_symbol => start_value_for_anchor } }, { :limit => page_size, :sort => { anchor => asc_or_desc } } )				
+				cursor.each{|x| results << x}
+			end
+
 			results
 		end
 
@@ -135,8 +137,12 @@ class Mongodoc
 			collection_name=options[:collection]#bugbug - collection should default internally..?
 			id=options[:_id]
 			raise "Missing required :_id options parameter" unless id
-			col=Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name)
-			col.find_one(:_id => BSON.ObjectId(id))
+			result=nil
+			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+				result=col.find_one(:_id => BSON.ObjectId(id))
+			end
+
+			result
 		end
 
 		def get_with_bson(options={})
@@ -146,8 +152,25 @@ class Mongodoc
 			collection_name=options[:collection]#bugbug - collection should default internally..?
 			id=options[:_id]
 			raise "Missing required :_id options parameter" unless id
-			col=Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name)
-			col.find_one(:_id => id)
+			result=nil
+			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+				result=col.find_one(:_id => id)
+			end
+
+			result
+		end
+
+		def insert(raw_hash, options={})
+			db_host=options[:host] || Mongodoc.HOST
+			db_port=options[:port] || Mongodoc.PORT
+			db_name=options[:db] || Mongodoc.DB
+			collection_name=options[:collection]#bugbug - collection should default internally..?
+			id=nil
+			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+				id=col.insert(raw_hash)
+			end
+
+			id
 		end
 
 	end#end of class

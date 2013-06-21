@@ -327,5 +327,16 @@ describe Mongodoc do
 				expect(raw_hash).to be_nil
 			end
 		end
+		describe "insert" do
+			it "throws an exception if you insert nil" do
+				expect{Mongodoc.insert(nil, :collection=>@col_name)}.to raise_error
+			end
+			it "throws an exception with no args" do
+				expect{Mongodoc.insert}.to raise_error
+			end
+			it "returns a bson object when you insert something non-nil" do
+				expect(Mongodoc.insert({:name=>'inserted', :value=>987987}, :collection=>@col_name)).to be_an_instance_of(BSON::ObjectId)
+			end
+		end
 	end# crud operations
 end
