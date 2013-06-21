@@ -338,5 +338,41 @@ describe Mongodoc do
 				expect(Mongodoc.insert({:name=>'inserted', :value=>987987}, :collection=>@col_name)).to be_an_instance_of(BSON::ObjectId)
 			end
 		end
+		describe "update" do
+			it "throws exception if called with less than 2 args" do
+				expect{Mongodoc.update}.to raise_error
+				expect{Mongodoc.update('adf')}.to raise_error
+			end
+			it "throws exception if second arg is not a hash" do
+				expect{Mongodoc.update('adsf',nil)}.to raise_error
+				expect{Mongodoc.update('asdf',[])}.to raise_error
+				expect{Mongodoc.update('asdf','will barf')}.to raise_error
+			end
+			it "returns a hash with an 'n' key which is a Fixnum if args are valid" do
+				err_hash=Mongodoc.update('junk string',{}, :collection=>@col_name)
+				expect(err_hash).to be_a_kind_of(Hash) # it's actually an instance of BSON::OrderedHash
+				expect(err_hash['n']).to be_an_instance_of(Fixnum)
+			end
+			it "returns a hash with n=0 for valid, nonexisting args" do
+				err_hash=Mongodoc.update('junk string',{}, :collection=>@col_name)
+				expect(err_hash['n']).to eq(0)
+			end
+			describe "for existing item" do
+				before :all do
+					@raw_item=@col.find.next
+					@bson=@raw_item['_id']
+				end
+				it "returns a hash with n=1 for valid, existing args" do
+					err_hash=Mongodoc.update(@bson, @raw_item, :collection=>@col_name)
+					expect(err_hash['n']).to eq(1)
+				end
+				it "actually updates what's in the db for valid, existing args" do
+					@raw_item[:foo=>'bar']
+					err_hash=Mongodoc.update(@bson, @raw_item, :collection=>@col_name)
+					@updated=Mongodoc.get_with_bson(:_id=>@bson, :collection=>@col_name)
+					expect(@updated).to eql(@raw_item)
+				end
+			end
+		end
 	end# crud operations
 end

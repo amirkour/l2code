@@ -173,5 +173,21 @@ class Mongodoc
 			id
 		end
 
+		# probably not very useful - most of your update APIs should be targeted for performance.
+		# this one will "replace" the given bson_id with the given raw_hash
+		def update(bson_id, raw_hash, options={})
+			db_host=options[:host] || Mongodoc.HOST
+			db_port=options[:port] || Mongodoc.PORT
+			db_name=options[:db] || Mongodoc.DB
+			collection_name=options[:collection]#bugbug - collection should default internally..?
+
+			err_hash=nil
+			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+				err_hash=col.update({:_id=>bson_id}, raw_hash, options)
+			end
+
+			err_hash
+		end
+
 	end#end of class
 end
