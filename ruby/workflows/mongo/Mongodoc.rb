@@ -7,7 +7,9 @@ class Mongodoc
 	@HOST='localhost'
 	@PORT=27017
 	@DB='mongodoc_test'
+	@COLLECTION=nil
 	@paging_anchor_hash=nil
+	
 
 	attr_accessor :raw_hash		# this is the raw hash going in and out of mongo
 
@@ -17,12 +19,13 @@ class Mongodoc
 	class << self
 
 		# set these via Mongodoc.configure
-		attr_reader :PORT, :HOST, :DB
+		attr_reader :PORT, :HOST, :DB, :COLLECTION
 
 		def configure(options = {})
 			@HOST = options[:host] || @HOST
 			@PORT = options[:port] || @PORT
 			@DB = options[:db] || @DB
+			@COLLECTION = options[:collection] || @COLLECTION
 		end
 
 		def client(options = {}, &block)
@@ -58,7 +61,7 @@ class Mongodoc
 			db_host=options[:host] || Mongodoc.HOST
 			db_port=options[:port] || Mongodoc.PORT
 			db_name=options[:db] || Mongodoc.DB
-			collection_name=options[:collection]
+			collection_name=options[:collection] || Mongodoc.COLLECTION
 			raise "Invalid collection specified" unless collection_name
 
 			db=Mongodoc.db(:host => db_host, :port => db_port, :db => db_name)
@@ -88,11 +91,6 @@ class Mongodoc
 		end
 
 		def get_paged(options={})
-			
-			db_host=options[:host] || Mongodoc.HOST
-			db_port=options[:port] || Mongodoc.PORT
-			db_name=options[:db] || Mongodoc.DB
-			collection_name=options[:collection]#bugbug - collection should default internally..?
 
 			# the anchor is the document field you want to sort over.
 			# it should be something unique and indexed so that paging is fast and distinct.
@@ -120,7 +118,7 @@ class Mongodoc
 			#BUGBUG - this should return the actual subclass type, or maybe a generic subclass (which all concretes
 			#	descne from) will handle the casting/converting for you..?
 			results=[]
-			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+			Mongodoc.collection(options) do |col|
 
 				# col.find({:value=>{:$gte=>30}}, {:limit=>20,:sort=>{:value=>:asc}}).each{|x| puts x}
 				cursor=col.find( { anchor => { equivalency_symbol => start_value_for_anchor } }, { :limit => page_size, :sort => { anchor => asc_or_desc } } )				
@@ -131,14 +129,10 @@ class Mongodoc
 		end
 
 		def get_with_id_string(options={})
-			db_host=options[:host] || Mongodoc.HOST
-			db_port=options[:port] || Mongodoc.PORT
-			db_name=options[:db] || Mongodoc.DB
-			collection_name=options[:collection]#bugbug - collection should default internally..?
 			id=options[:_id]
 			raise "Missing required :_id options parameter" unless id
 			result=nil
-			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+			Mongodoc.collection(options) do |col|
 				result=col.find_one(:_id => BSON.ObjectId(id))
 			end
 
@@ -146,14 +140,10 @@ class Mongodoc
 		end
 
 		def get_with_bson(options={})
-			db_host=options[:host] || Mongodoc.HOST
-			db_port=options[:port] || Mongodoc.PORT
-			db_name=options[:db] || Mongodoc.DB
-			collection_name=options[:collection]#bugbug - collection should default internally..?
 			id=options[:_id]
 			raise "Missing required :_id options parameter" unless id
 			result=nil
-			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+			Mongodoc.collection(options) do |col|
 				result=col.find_one(:_id => id)
 			end
 
@@ -161,12 +151,8 @@ class Mongodoc
 		end
 
 		def insert(raw_hash, options={})
-			db_host=options[:host] || Mongodoc.HOST
-			db_port=options[:port] || Mongodoc.PORT
-			db_name=options[:db] || Mongodoc.DB
-			collection_name=options[:collection]#bugbug - collection should default internally..?
 			id=nil
-			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+			Mongodoc.collection(options) do |col|
 				id=col.insert(raw_hash)
 			end
 
@@ -176,13 +162,8 @@ class Mongodoc
 		# probably not very useful - most of your update APIs should be targeted for performance.
 		# this one will "replace" the given bson_id with the given raw_hash
 		def update(bson_id, raw_hash, options={})
-			db_host=options[:host] || Mongodoc.HOST
-			db_port=options[:port] || Mongodoc.PORT
-			db_name=options[:db] || Mongodoc.DB
-			collection_name=options[:collection]#bugbug - collection should default internally..?
-
 			err_hash=nil
-			Mongodoc.collection(:host=>db_host, :port=>db_port, :db=>db_name, :collection=>collection_name) do |col|
+			Mongodoc.collection(options) do |col|
 				err_hash=col.update({:_id=>bson_id}, raw_hash, options)
 			end
 
