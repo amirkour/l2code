@@ -7,7 +7,6 @@ class Mongodoc
 	@HOST='localhost'
 	@PORT=27017
 	@DB='mongodoc_test'
-	@paging_anchor_hash=nil
 	
 
 	attr_accessor :raw_hash		# this is the raw hash going in and out of mongo
@@ -80,46 +79,27 @@ class Mongodoc
 			false
 		end
 
-		# implement this in subclasses to provide default for anchor
-		def get_anchor_default(anchor)
-			raise "No default anchor hash provided - you have to implement this in your subclasses via @paging_anchor_hash" unless @paging_anchor_hash
-			
-			@paging_anchor_hash[anchor]
-			# {:value=>0, :name=>"foo0"} - provides the 'page 0' default for the given field for paging
-		end
-
 		def get_paged(options={})
 
-			# the anchor is the document field you want to sort over.
-			# it should be something unique and indexed so that paging is fast and distinct.
-			# creation date might work if it's unique. a custom ID might be another good one.
-			anchor=options[:anchor]
-			raise "No anchor specified for paging" unless anchor
-
-			# value for last element of previous page.
-			# for page 0, should be the minimum value available for the anchor field.
-			start_value_for_anchor=options[:anchor_start] || get_anchor_default(anchor)
-			raise "No anchor value specified and no anchor default detected for paging" unless start_value_for_anchor
-
-			asc_or_desc=:asc # bugbug - configurable?
-
+			max_page=100		# bugbug - configurable?
 			max_page_size=25 # bugbug - configurable?
-			page_size=options[:page_size] || max_page_size # bugbug - configurable?
+			page=options[:page] || 0
+			raise "Page number must be a positive number not exceeding #{max_page}" unless page >= 0 && page < max_page
 
+			page_size=options[:page_size] || max_page_size # bugbug - configurable?
 			raise "Page size must be a positive number not exceeding #{max_page_size}" unless(page_size <= max_page_size && page_size > 0)
 
-			# on page 0, include the minimum value.
-			# otherwise, exclude the start value, since it will have been the last element
-			# of the previous page
-			equivalency_symbol = start_value_for_anchor.equal?(get_anchor_default(anchor)) ? :$gte : :$gt
-
+			num_to_skip=page * page_size
 			#BUGBUG - this should return the actual subclass type, or maybe a generic subclass (which all concretes
 			#	descne from) will handle the casting/converting for you..?
 			results=[]
 			Mongodoc.collection(options) do |col|
 
+				# this is probably how best to do paging but it requires you keep track of
+				# an anchor element, and a minimum anchor value, and the last element of the
+				# previous page
 				# col.find({:value=>{:$gte=>30}}, {:limit=>20,:sort=>{:value=>:asc}}).each{|x| puts x}
-				cursor=col.find( { anchor => { equivalency_symbol => start_value_for_anchor } }, { :limit => page_size, :sort => { anchor => asc_or_desc } } )				
+				cursor=col.find( {}, {:limit => page_size, :skip=>num_to_skip})
 				cursor.each{|x| results << x}
 			end
 
