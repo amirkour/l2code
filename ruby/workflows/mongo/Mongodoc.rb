@@ -7,7 +7,6 @@ class Mongodoc
 	@HOST='localhost'
 	@PORT=27017
 	@DB='mongodoc_test'
-	@COLLECTION=nil
 	@paging_anchor_hash=nil
 	
 
@@ -19,13 +18,12 @@ class Mongodoc
 	class << self
 
 		# set these via Mongodoc.configure
-		attr_reader :PORT, :HOST, :DB, :COLLECTION
+		attr_reader :PORT, :HOST, :DB
 
 		def configure(options = {})
 			@HOST = options[:host] || @HOST
 			@PORT = options[:port] || @PORT
 			@DB = options[:db] || @DB
-			@COLLECTION = options[:collection] || @COLLECTION
 		end
 
 		def client(options = {}, &block)
@@ -61,7 +59,7 @@ class Mongodoc
 			db_host=options[:host] || Mongodoc.HOST
 			db_port=options[:port] || Mongodoc.PORT
 			db_name=options[:db] || Mongodoc.DB
-			collection_name=options[:collection] || Mongodoc.COLLECTION
+			collection_name=options[:collection]
 			raise "Invalid collection specified" unless collection_name
 
 			db=Mongodoc.db(:host => db_host, :port => db_port, :db => db_name)
