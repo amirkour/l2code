@@ -101,5 +101,34 @@ describe Mongooz do
 				end
 			end
 		end# end ::db
+		describe "::collection" do
+			before :all do
+				@collection_fake='nonexisting'
+				@collection_test='mongooz_test_collection_spec_collection'
+				Mongooz::Base::db do |db|
+					db[@collection_test].insert({:foo=>'bar'})
+				end
+			end
+			after :all do
+				Mongooz::Base::db do |db|
+					db.drop_collection(@collection_test)
+				end
+			end
+			it "raises an error without a collection name" do
+				expect{Mongooz::Base::collection}.to raise_error
+			end
+			it "returns an object of type Mongo::Collection for fake collection #{@collection_fake}" do
+				expect(Mongooz::Base::collection(:collection => @collection_fake)).to be_an_instance_of(Mongo::Collection)
+			end
+			it "returns an object of type Mongo::Collection for test collection #{@collection_test}" do
+				expect(Mongooz::Base::collection(:collection => @collection_test)).to be_an_instance_of(Mongo::Collection)
+			end
+			it "returns a non-empty collection for test collection #{@collection_test}" do
+				expect(Mongooz::Base::collection(:collection => @collection_test).count).to be > 0 
+			end
+			it "should yield with a block" do
+				expect{|b| Mongooz::Base::collection(:collection => 'mumble', &b) }.to yield_with_args(Mongo::Collection)
+			end
+		end
 	end# end ::Base
 end# end Mongooz

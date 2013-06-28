@@ -33,5 +33,20 @@ module Mongooz
 				client.close
 			end
 		end
+		def self.collection(options={}, &block)
+			db_host=options[:host] || DEFAULT_HOST
+			db_port=options[:port] || DEFAULT_PORT
+			db_name=options[:db] || DEFAULT_DB
+			collection_name=options[:collection]
+			raise "Missing required :collection parameter" unless collection_name
+
+			db=Mongooz::Base::db(:host => db_host, :port => db_port, :db => db_name)
+			return db[collection_name] unless block
+			begin
+				block.call(db[collection_name])
+			ensure
+				db.connection.close
+			end
+		end
 	end# Base
 end
