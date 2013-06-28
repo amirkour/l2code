@@ -66,6 +66,40 @@ describe Mongooz do
 					end
 				end
 			end
-		end# #client
+		end# ::client
+		describe "::db" do
+			context 'without any args' do
+				before :all do
+					@db=Mongooz::Base::db
+				end
+				after :all do
+					@db.connection.close
+				end
+				it 'should be an instance of Mongo::DB' do
+					expect(@db).to be_an_instance_of(Mongo::DB)
+				end
+				it "should be pointed at the #{Mongooz::Base::DEFAULT_DB} database" do
+					expect(@db.name).to eq(Mongooz::Base::DEFAULT_DB)
+				end
+				it "should yield with a block" do
+					expect {|b| Mongooz::Base::db(&b) }.to yield_with_args(Mongo::DB)
+				end
+			end
+			context "with db arg" do
+				before :all do
+					@db_name='foo'
+					@db=Mongooz::Base::db(:db => @db_name)
+				end
+				it "should be an instance of Mongo::DB" do
+					expect(@db).to be_an_instance_of(Mongo::DB)
+				end
+				it "should be pointed at the '#{@db_name}' database" do
+					expect(@db.name).to eq(@db_name)
+				end
+				it "should yield with a block" do
+					expect {|b| Mongooz::Base::db(:db => @db_name, &b) }.to yield_with_args(Mongo::DB)
+				end
+			end
+		end# end ::db
 	end# end ::Base
 end# end Mongooz
