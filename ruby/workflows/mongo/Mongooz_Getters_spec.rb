@@ -55,6 +55,33 @@ describe Mongooz do
 					expect(GetTest.get_with_bson(:_id=>@id)).to_not be_nil
 				end
 			end
+		end# ::get_with_bson
+
+
+		describe "::get_with_string" do
+			before :all do
+				@id_str=@id.to_s
+			end
+			it "throws an error with anything that's not a valid bson string" do
+				expect{GetTest.get_with_string(:collection=>@test_collection, :_id=>nil)}.to raise_error
+				expect{GetTest.get_with_string(:collection=>@test_collection, :_id=>'hi')}.to raise_error
+				expect{GetTest.get_with_string(:collection=>@test_collection, :_id=>[])}.to raise_error
+			end
+			it "returns a raw hash back with a valid bson string that exists" do
+				raw_hash=GetTest.get_with_string(:collection=>@test_collection, :_id=>@id_str)
+				expect(raw_hash).to_not be_nil
+				expect(raw_hash).to be_a_kind_of(Hash)
+			end
+			it "returns nil for a valid bson string that doesn't exist" do
+				raw_hash=GetTest.get_with_string(:collection=>@test_collection, :_id=>@id_str.reverse)
+				expect(raw_hash).to be_nil
+			end
+			it "returns nil for an invalid collection name" do
+				raw_hash=GetTest.get_with_string(:collection=>'mumble', :_id=>@id_str)
+				expect(raw_hash).to be_nil
+			end
 		end
+
+
 	end# ::Getters
 end

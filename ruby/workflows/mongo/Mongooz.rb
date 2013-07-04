@@ -54,27 +54,46 @@ module Mongooz
 	module Getters
 
 		# override this in your class to provide default options
-		# to the various mongooz APIs, such as a default
-		# collection name, etc
+		# to the various mongooz APIs. IE:
+		# {:collection=>'some default collection name', :db=>'some default db', :host=>'localhost', :port=>27017}
 		def get_defaults
 			nil
+		end
+
+		# will override options in the given hash with defaults, where defaults
+		# are specified
+		def set_options(options)
+			return unless options.kind_of?(Hash)
+			defaults=get_defaults
+			if defaults
+				options[:collection]=options[:collection] || defaults[:collection]
+				options[:db]=options[:db] || defaults[:db]
+				options[:host]=options[:host] || defaults[:host]
+				options[:port]=options[:port] || defaults[:port]
+			end
 		end
 
 		def get_with_bson(options={})
 			id=options[:_id]
 			raise "Missing required :_id options parameter" unless id
 
-			defaults=get_defaults
-			if defaults
-				options[:collection]=defaults[:collection] unless options[:collection]
-				options[:db]=defaults[:db] unless options[:db]
-				options[:host]=defaults[:host] unless options[:host]
-				options[:port]=defaults[:port] unless options[:port]
-			end
-
+			set_options(options)
 			result=nil
 			Mongooz::Base.collection(options) do |col|
 				result=col.find_one(:_id => id)
+			end
+
+			result
+		end
+
+		def get_with_string(options={})
+			id=options[:_id]
+			raise "Missing required :_id options parameter" unless id
+
+			set_options(options)
+			result=nil
+			Mongooz::Base.collection(options) do |col|
+				result=col.find_one(:_id => BSON.ObjectId(id))
 			end
 
 			result
