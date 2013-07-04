@@ -49,4 +49,35 @@ module Mongooz
 			end
 		end
 	end# Base
+
+	# 'extend' this to attach it to your eigenclass
+	module Getters
+
+		# override this in your class to provide default options
+		# to the various mongooz APIs, such as a default
+		# collection name, etc
+		def get_defaults
+			nil
+		end
+
+		def get_with_bson(options={})
+			id=options[:_id]
+			raise "Missing required :_id options parameter" unless id
+
+			defaults=get_defaults
+			if defaults
+				options[:collection]=defaults[:collection] unless options[:collection]
+				options[:db]=defaults[:db] unless options[:db]
+				options[:host]=defaults[:host] unless options[:host]
+				options[:port]=defaults[:port] unless options[:port]
+			end
+
+			result=nil
+			Mongooz::Base.collection(options) do |col|
+				result=col.find_one(:_id => id)
+			end
+
+			result
+		end
+	end
 end
