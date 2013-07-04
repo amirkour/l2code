@@ -11,6 +11,7 @@ describe Mongooz do
 			@id=nil
 			Mongooz::Base.collection(:collection=>@test_collection) do |col|
 				@id=col.insert({:foo=>'bar',:baz=>'baz'})
+				200.times{|i| col.insert({:name=>"Foo#{i}", :value=>i})}
 			end
 		end
 		after :all do
@@ -57,7 +58,6 @@ describe Mongooz do
 			end
 		end# ::get_with_bson
 
-
 		describe "::get_with_string" do
 			before :all do
 				@id_str=@id.to_s
@@ -80,8 +80,42 @@ describe Mongooz do
 				raw_hash=GetTest.get_with_string(:collection=>'mumble', :_id=>@id_str)
 				expect(raw_hash).to be_nil
 			end
-		end
+		end# ::get_with_string
 
-
+		describe "::get_paged" do
+			before :all do
+				@page_size=10
+				@page=0
+			end
+			describe "fail cases" do
+				it "fails with negative page" do
+					expect{GetTest.get_paged(:page_size=>@page_size, :page=>-1, :collection=>@test_collection)}.to raise_error
+				end
+				it "fails with negative page size" do
+					expect{GetTest.get_paged(:page_size=>-1, :page=>@page, :collection=>@test_collection)}.to raise_error
+				end
+				it "returns a non-nil, empty list on a nonexisting collection" do
+					list=GetTest.get_paged(:page=>@page, :page_size=>@page_size, :collection=>'bla')
+					expect(list).to_not be_nil
+					expect(list.count).to eq(0)
+				end
+			end
+			describe "pass cases" do
+				context "on an existing collection with items in it" do
+					it "returns a non empty list" do
+						list=GetTest.get_paged(:page=>@page, :page_size=>@page_size, :collection=>@test_collection)
+						expect(list).to_not be_nil
+						expect(list).to be_a_kind_of(Enumerable)
+						expect(list).to be_an_instance_of(Array)
+						expect(list.count).to be > 0
+					end
+					it "pages correctly" do
+						page_one=GetTest.get_paged(:page=>0, :page_size=>@page_size, :collection=>@test_collection)
+						page_two=GetTest.get_paged(:page=>1, :page_size=>(@page_size-1), :collection=>@test_collection)
+						expect(page_one.last).to eq(page_two.first)
+					end
+				end
+			end
+		end# ::get_paged
 	end# ::Getters
 end

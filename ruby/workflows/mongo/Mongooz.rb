@@ -98,5 +98,34 @@ module Mongooz
 
 			result
 		end
+
+		def get_paged(options={})
+
+			max_page=100		# bugbug - configurable?
+			max_page_size=25    # bugbug - configurable?
+			page=options[:page] || 0
+			raise "Page number must be a positive number not exceeding #{max_page}" unless page >= 0 && page < max_page
+
+			page_size=options[:page_size] || max_page_size # bugbug - configurable?
+			raise "Page size must be a positive number not exceeding #{max_page_size}" unless(page_size <= max_page_size && page_size > 0)
+
+			num_to_skip=page * page_size
+			set_options(options)
+
+			#BUGBUG - this list should return the actual subclass type, or maybe a generic subclass (which all concretes
+			#descend from) which will handle the casting/converting for you ...
+			results=[]
+			Mongooz::Base.collection(options) do |col|
+
+				# this is probably how best to do paging but it requires you keep track of
+				# an anchor element, and a minimum anchor value, and the last element of the
+				# previous page
+				# col.find({:value=>{:$gte=>30}}, {:limit=>20,:sort=>{:value=>:asc}}).each{|x| puts x}
+				cursor=col.find( {}, {:limit => page_size, :skip=>num_to_skip})
+				cursor.each{|x| results << x}
+			end
+
+			results
+		end
 	end
 end
