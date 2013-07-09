@@ -127,5 +127,28 @@ module Mongooz
 
 			results
 		end
-	end
+	end# Getters
+
+	# 'include' this to attach it to instances of your class
+	module Persist
+		def insert(raw_hash, options={})
+			id=nil
+			Mongooz::Base.collection(options) do |col|
+				id=col.insert(raw_hash)
+			end
+
+			id
+		end
+
+		# probably not very useful - most of your update APIs should be targeted for performance.
+		# this one will "replace" the given bson_id with the given raw_hash
+		def update(bson_id, raw_hash, options={})
+			err_hash=nil
+			Mongooz::Base.collection(options) do |col|
+				err_hash=col.update({:_id=>bson_id}, raw_hash, options)
+			end
+
+			err_hash
+		end
+	end# Persist
 end

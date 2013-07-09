@@ -7,7 +7,7 @@ end
 describe Mongooz do
 	describe '::Getters' do
 		before :all do
-			@test_collection='mongooz_getters_spec_test_db'
+			@test_collection='mongooz_getters_spec_test_collection'
 			@id=nil
 			Mongooz::Base.collection(:collection=>@test_collection) do |col|
 				@id=col.insert({:foo=>'bar',:baz=>'baz'})
