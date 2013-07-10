@@ -56,15 +56,15 @@ module Mongooz
 		# override this in your class to provide default options
 		# to the various mongooz getter APIs. IE:
 		# {:collection=>'some default collection name', :db=>'some default db', :host=>'localhost', :port=>27017}
-		def get_default_getter_options
+		def get_default_mongooz_getter_options
 			nil
 		end
 
 		# will override options in the given hash with defaults, where defaults
 		# are specified
-		def set_options(options)
+		def set_mongooz_options(options)
 			return unless options.kind_of?(Hash)
-			defaults=get_default_getter_options
+			defaults=get_default_mongooz_getter_options
 			if defaults
 				options[:collection]=options[:collection] || defaults[:collection]
 				options[:db]=options[:db] || defaults[:db]
@@ -73,11 +73,11 @@ module Mongooz
 			end
 		end
 
-		def get_with_bson(options={})
+		def mongooz_get_with_bson(options={})
 			id=options[:_id]
 			raise "Missing required :_id options parameter" unless id
 
-			set_options(options)
+			set_mongooz_options(options)
 			result=nil
 			Mongooz::Base.collection(options) do |col|
 				result=col.find_one(:_id => id)
@@ -86,11 +86,11 @@ module Mongooz
 			result
 		end
 
-		def get_with_string(options={})
+		def mongooz_get_with_string(options={})
 			id=options[:_id]
 			raise "Missing required :_id options parameter" unless id
 
-			set_options(options)
+			set_mongooz_options(options)
 			result=nil
 			Mongooz::Base.collection(options) do |col|
 				result=col.find_one(:_id => BSON.ObjectId(id))
@@ -99,7 +99,7 @@ module Mongooz
 			result
 		end
 
-		def get_paged(options={})
+		def mongooz_get_paged(options={})
 
 			max_page=100		# bugbug - configurable?
 			max_page_size=25    # bugbug - configurable?
@@ -110,7 +110,7 @@ module Mongooz
 			raise "Page size must be a positive number not exceeding #{max_page_size}" unless(page_size <= max_page_size && page_size > 0)
 
 			num_to_skip=page * page_size
-			set_options(options)
+			set_mongooz_options(options)
 
 			#BUGBUG - this list should return the actual subclass type, or maybe a generic subclass (which all concretes
 			#descend from) which will handle the casting/converting for you ...
@@ -135,15 +135,15 @@ module Mongooz
 		# override this in your class to provide default options
 		# to the various persist APIs. IE:
 		# {:collection=>'some default collection name', :db=>'some default db', :host=>'localhost', :port=>27017}
-		def get_default_persist_options
+		def get_default_mongooz_persist_options
 			nil
 		end
 
 		# will override options in the given hash with defaults, where defaults
 		# are specified
-		def set_options(options)
+		def set_mongooz_options(options)
 			return unless options.kind_of?(Hash)
-			defaults=get_default_persist_options
+			defaults=get_default_mongooz_persist_options
 			if defaults
 				options[:collection]=options[:collection] || defaults[:collection]
 				options[:db]=options[:db] || defaults[:db]
@@ -152,8 +152,8 @@ module Mongooz
 			end
 		end
 
-		def insert(raw_hash, options={})
-			set_options(options)
+		def mongooz_insert(raw_hash, options={})
+			set_mongooz_options(options)
 			id=nil
 			Mongooz::Base.collection(options) do |col|
 				id=col.insert(raw_hash)
@@ -164,8 +164,8 @@ module Mongooz
 
 		# probably not very useful - most of your update APIs should be targeted for performance.
 		# this one will "replace" the given bson_id with the given raw_hash
-		def update(bson_id, raw_hash, options={})
-			set_options(options)
+		def mongooz_update(bson_id, raw_hash, options={})
+			set_mongooz_options(options)
 			err_hash=nil
 			Mongooz::Base.collection(options) do |col|
 				err_hash=col.update({:_id=>bson_id}, raw_hash, options)
