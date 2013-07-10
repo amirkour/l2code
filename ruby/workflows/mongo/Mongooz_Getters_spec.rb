@@ -30,12 +30,12 @@ describe Mongooz do
 				expect(GetTest.get_with_bson(:_id=>@id, :collection=>@test_collection)).to_not be_nil
 				expect(GetTest.get_with_bson(:_id=>@id, :collection=>@test_collection)).to be_a_kind_of(Hash)
 			end
-			describe "with get_defaults defined" do
+			describe "with get_default_getter_options defined" do
 				before :all do
 					class GetTest
 						class << self
-							def get_defaults
-								{:collection=>'mongooz_getters_spec_test_db'}#for some reason, get access @test_collection here ...
+							def get_default_getter_options
+								{:collection=>'mongooz_getters_spec_test_collection'}#for some reason, get access @test_collection here ...
 							end
 						end
 					end
@@ -43,12 +43,12 @@ describe Mongooz do
 				after :all do
 					class GetTest
 						class << self
-							remove_method :get_defaults
+							remove_method :get_default_getter_options
 						end
 					end
 				end
-				it "has a get_defaults function that returns a hash with a :collection in it" do
-					hash=GetTest.get_defaults
+				it "has a get_default_getter_options function that returns a hash with a :collection in it" do
+					hash=GetTest.get_default_getter_options
 					expect(hash).to_not be_nil
 					expect(hash).to be_an_instance_of(Hash)
 				end

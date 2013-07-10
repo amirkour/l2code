@@ -54,9 +54,9 @@ module Mongooz
 	module Getters
 
 		# override this in your class to provide default options
-		# to the various mongooz APIs. IE:
+		# to the various mongooz getter APIs. IE:
 		# {:collection=>'some default collection name', :db=>'some default db', :host=>'localhost', :port=>27017}
-		def get_defaults
+		def get_default_getter_options
 			nil
 		end
 
@@ -64,7 +64,7 @@ module Mongooz
 		# are specified
 		def set_options(options)
 			return unless options.kind_of?(Hash)
-			defaults=get_defaults
+			defaults=get_default_getter_options
 			if defaults
 				options[:collection]=options[:collection] || defaults[:collection]
 				options[:db]=options[:db] || defaults[:db]
@@ -131,7 +131,29 @@ module Mongooz
 
 	# 'include' this to attach it to instances of your class
 	module Persist
+
+		# override this in your class to provide default options
+		# to the various persist APIs. IE:
+		# {:collection=>'some default collection name', :db=>'some default db', :host=>'localhost', :port=>27017}
+		def get_default_persist_options
+			nil
+		end
+
+		# will override options in the given hash with defaults, where defaults
+		# are specified
+		def set_options(options)
+			return unless options.kind_of?(Hash)
+			defaults=get_default_persist_options
+			if defaults
+				options[:collection]=options[:collection] || defaults[:collection]
+				options[:db]=options[:db] || defaults[:db]
+				options[:host]=options[:host] || defaults[:host]
+				options[:port]=options[:port] || defaults[:port]
+			end
+		end
+
 		def insert(raw_hash, options={})
+			set_options(options)
 			id=nil
 			Mongooz::Base.collection(options) do |col|
 				id=col.insert(raw_hash)
@@ -143,6 +165,7 @@ module Mongooz
 		# probably not very useful - most of your update APIs should be targeted for performance.
 		# this one will "replace" the given bson_id with the given raw_hash
 		def update(bson_id, raw_hash, options={})
+			set_options(options)
 			err_hash=nil
 			Mongooz::Base.collection(options) do |col|
 				err_hash=col.update({:_id=>bson_id}, raw_hash, options)
