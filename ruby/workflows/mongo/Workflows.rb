@@ -38,7 +38,7 @@ module Workflows
 				self.new.update(hash_to_wrap)
 			end
 
-			def db_get_with_bson(options={})
+			def db_get_with_id(options={})
 				id=options[:_id]
 				raise "Missing required :_id options parameter" unless id
 
@@ -51,17 +51,56 @@ module Workflows
 				typified_result_hash_or_nil(result)
 			end
 
-			def db_get_with_string(options={})
-				id=options[:_id]
-				raise "Missing required :_id options parameter" unless id
+			def db_get_with_bson_string(bson_string, options={})
+				bson_id=nil
+				begin
+					bson_id=BSON.ObjectId(bson_string)
+				rescue
+					raise "Expected string #{bson_string.to_s} to be a valid bson id"
+				end
+				raise "Failed to bson-ify #{bson_string.to_s}" if bson_id.nil?
 
 				set_db_options(options)
 				result=nil
 				Mongooz::Base.collection(options) do |col|
-					result=col.find_one(:_id => BSON.ObjectId(id))
+					result=col.find_one(:_id => bson_id)
 				end
 
 				typified_result_hash_or_nil(result)
+			end
+
+			def db_get_paged(options={})
+
+				max_page=100		# bugbug - configurable?
+				max_page_size=25    # bugbug - configurable?
+				page=options[:page] || 0
+				raise "Page number must be a non-negative number not exceeding #{max_page}" unless page >= 0 && page < max_page
+
+				page_size=options[:page_size] || max_page_size # bugbug - configurable?
+				raise "Page size must be a positive number not exceeding #{max_page_size}" unless(page_size <= max_page_size && page_size > 0)
+
+				num_to_skip=page * page_size
+				set_db_options(options)
+
+				#BUGBUG - this list should return the actual subclass type, or maybe a generic subclass (which all concretes
+				#descend from) which will handle the casting/converting for you ...
+				results=[]
+				Mongooz::Base.collection(options) do |col|
+
+					# this is probably how best to do paging but it requires you keep track of
+					# an anchor element, and a minimum anchor value, and the last element of the
+					# previous page
+					# col.find({:value=>{:$gte=>30}}, {:limit=>20,:sort=>{:value=>:asc}}).each{|x| puts x}
+
+					# this is a lot easier to maintain, off the bat
+					cursor=col.find( {}, {:limit => page_size, :skip=>num_to_skip})
+					cursor.each do |next_result|
+						typed_result=typified_result_hash_or_nil(next_result)
+						results << typed_result if typed_result
+					end
+				end
+
+				results
 			end
 		end
 
@@ -83,12 +122,12 @@ module Workflows
 		end
 
 		# probably not very useful - most of your update APIs should be targeted for performance.
-		# this one will "replace" the given bson_id with the given raw_hash
-		def db_update(bson_id, raw_hash, options={})
+		# this one will "replace" the given id with the given raw_hash
+		def db_update(id, raw_hash, options={})
 			set_db_options(options)
 			err_hash=nil
 			Mongooz::Base.collection(options) do |col|
-				err_hash=col.update({:_id=>bson_id}, raw_hash, options)
+				err_hash=col.update({:_id=>id}, raw_hash, options)
 			end
 
 			err_hash
@@ -96,16 +135,21 @@ module Workflows
 
 		def db_save!(options={})
 			success=false;
-			id=self[:_id] || self['_id']
+			id=self['_id'] || self[:_id] # get the string version first, since mongo stores/returns it that way
 			if id.nil?
 				db_insert(self, options)
 				success=true
 			else
+				options[:upsert]=true
 				err_hash=db_update(id, self, options)
 				success=err_hash['n'].to_i > 0
 			end
 
 			success
+		end
+
+		def db_delete(options={})
+			raise "UNimplemented!?"
 		end
 	end
 end
