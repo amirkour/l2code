@@ -51,6 +51,7 @@ module Mongooz
 	end# Base
 
 	# 'extend' this to attach it to your eigenclass
+	# TODO - DEPRECATED - this module is included in Workflows::WorkflowHash
 	module Getters
 
 		# override this in your class to provide default options
@@ -130,6 +131,7 @@ module Mongooz
 	end# Getters
 
 	# 'include' this to attach it to instances of your class
+	# TODO - DEPRECATED - this module is included in Workflows::WorkflowHash
 	module Persist
 
 		# override this in your class to provide default options

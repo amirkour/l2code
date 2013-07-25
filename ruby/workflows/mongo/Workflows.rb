@@ -1,4 +1,5 @@
 require './Mongooz.rb'
+require 'active_support/core_ext/hash/indifferent_access'
 
 
 module Workflows
@@ -7,7 +8,7 @@ module Workflows
 	@DEFAULT_HOST='localhost'
 	@DEFAULT_PORT=27017
 	class << self
-		attr_reader :DEFAULT_DB, :DEFAULT_HOST, :DEFAULT_PORT	
+		attr_reader :DEFAULT_DB, :DEFAULT_HOST, :DEFAULT_PORT
 		def defaults(options={})
 			@DEFAULT_DB=options[:db] if options[:db]
 			@DEFAULT_HOST=options[:host] if options[:host]
@@ -16,7 +17,7 @@ module Workflows
 	end
 
 	# class that all workflow related objects derive from
-	class WorkflowHash < Hash
+	class WorkflowHash < HashWithIndifferentAccess
 
 		class << self
 			def get_class_name_without_namespace(class_to_retrieve_name_from)
@@ -82,8 +83,6 @@ module Workflows
 				num_to_skip=page * page_size
 				set_db_options(options)
 
-				#BUGBUG - this list should return the actual subclass type, or maybe a generic subclass (which all concretes
-				#descend from) which will handle the casting/converting for you ...
 				results=[]
 				Mongooz::Base.collection(options) do |col|
 
@@ -122,7 +121,9 @@ module Workflows
 		end
 
 		# probably not very useful - most of your update APIs should be targeted for performance.
-		# this one will "replace" the given id with the given raw_hash
+		# this one will "replace" the given id with the given raw_hash.
+		# you can use this API for upserts too, just pass :upsert=>true in the options hash.
+		# behavior will differ on the upsert depending on whether or not the given id exists.
 		def db_update(id, raw_hash, options={})
 			set_db_options(options)
 			err_hash=nil
@@ -133,7 +134,8 @@ module Workflows
 			err_hash
 		end
 
-		def db_save!(options={})
+
+		def db_save(options={})
 			success=false;
 			id=self['_id'] || self[:_id] # get the string version first, since mongo stores/returns it that way
 			if id.nil?
@@ -148,8 +150,39 @@ module Workflows
 			success
 		end
 
-		def db_delete(options={})
-			raise "UNimplemented!?"
+		# deletes everything matching delete_query from a collection.
+		# 
+		# the options hash takes db/connection/host/port, as well as any options to the delete api.
+		#
+		# delete_query has to be a hash.  if it's absent, this API will delete all docs
+		# with _id=self[:_id].  If no such _id exists, raises an error.
+		def db_delete(delete_query=nil, options={})
+			query=nil
+			if(delete_query.nil?)
+				id=self[:_id]
+				raise "Cannot delete without an _id" unless id
+				query={:_id=>id}
+			else
+				raise "Delete query must be a hash" unless delete_query.kind_of?(Hash)
+				query=delete_query
+			end
+			
+			set_db_options(options)
+			err_hash=nil
+			Mongooz::Base.collection(options) do |col|
+				err_hash=col.remove(query,options)
+			end
+
+			raise "Didn't get an error hash from delete api?" if err_hash.nil?
+			raise "Didn't get an error hash that was a hash object from delete api?" unless err_hash.kind_of?(Hash)
+			raise "Didn't get an error hash with an 'n' key from delete api?" unless err_hash['n']
+			return err_hash['n']
+		end
+
+		# helper that raises errors if the given symbol is not present in the given hash
+		def ensure_hash_has_symbol(hash_to_check, symbol_to_ensure)
+			return unless symbol_to_ensure.kind_of?(Symbol) && hash_to_check.kind_of?(Hash)
+			raise "Missing required :#{symbol_to_ensure.to_s} hash parameter" unless hash_to_check[symbol_to_ensure]
 		end
 	end
 end
