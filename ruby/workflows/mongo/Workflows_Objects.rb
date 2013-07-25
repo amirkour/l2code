@@ -1,6 +1,7 @@
 require './Workflows.rb'
 include Workflows
 
+# contains all workflow objects
 module Workflows
 
 	class WorkflowTypes < WorkflowHash
