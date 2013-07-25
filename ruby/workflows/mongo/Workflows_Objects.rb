@@ -6,10 +6,10 @@ module Workflows
 
 	class WorkflowTypes < WorkflowHash
 
-		alias_method :original_db_save!, :db_save!
-		def db_save!(options={})
+		alias_method :original_db_save, :db_save
+		def db_save(options={})
 			ensure_hash_has_symbol(self, :_id)
-			original_db_save!(options)
+			original_db_save(options)
 		end
 
 		# generate a new workflow object.  each workflow has to have
@@ -29,17 +29,17 @@ module Workflows
 		# generate a new workflow object and immediately commit it to DB
 		def new_workflow!(new_workflow_name)
 			wf=new_workflow(new_workflow_name)
-			raise "Could not save new workflow to db" unless wf.db_save!
+			raise "Could not save new workflow to db" unless wf.db_save
 			wf
 		end
 	end
 
 	class Workflowz < WorkflowHash
-		alias_method :original_db_save!, :db_save!
-		def db_save!(options={})
+		alias_method :original_db_save, :db_save
+		def db_save(options={})
 			ensure_hash_has_symbol(self, :_id)
 			ensure_hash_has_symbol(self, :type) # should be the id of the workflowtype that generated this workflow
-			original_db_save!(options)
+			original_db_save(options)
 		end
 	end
 
