@@ -1,5 +1,7 @@
 require './Workflows.rb'
+require './Workflows_Status.rb'
 include Workflows
+
 
 # contains all workflow stuffzorsbla
 module Workflows
@@ -32,6 +34,8 @@ module Workflows
 			raise "Could not save new workflow to db" unless wf.db_save
 			wf
 		end
+
+		# TODO - each_step function and integration w/ WorkflowsSteps.get_steps
 	end
 
 	class Workflowz < WorkflowHash
@@ -43,6 +47,9 @@ module Workflows
 		end
 	end
 
-	class WorkflowSteps < WorkflowHash
+	class WorkflowItems < WorkflowHash
+		# TODO - integrate status mixin
+		#include WorkflowsStatus
+
 	end
 end

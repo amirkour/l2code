@@ -23,16 +23,22 @@ class Daemon
 			end
 
 			begin
-				if !item.ready?
+				if !item.processing? # the web/client has to put these in the queue with status=processing to indicate that they're in-queue
 					item.save do
-						item.feedback << "daemon encountered unready item #{item}"
+						item.feedback << "daemon encountered invalid processing state #{item.status} for item #{item[:_id]}"
 						item.error
 					end
 					return
 				end
 
 				item.processing!
-				item.each_step do |step|
+				workflow_type=WorkflowTypes.db_get_with_id :_id => item[:type]
+				error unless workflow_type
+
+				starting_step=item.step # <- this might be null, that's ok.  the each_step api should start from beginning
+
+				# if starting step is not null, each_step should start yielding from that step
+				workflow_type.each_step(starting_step) do |step|
 					if !step.validates?(item) # the 'validates' function should start by adding feedback to the effect of "now executing foo step"
 						item.save do
 							item.step=step
@@ -47,7 +53,7 @@ class Daemon
 				end
 				
 				# can only have gotten here if it went all the way to last step uninterrupted
-				item.complete!
+				item.complete! # that's a status thing
 			rescue => e
 				item.save do
 					item.error
