@@ -137,7 +137,7 @@ module Workflows
 
 		def db_save(options={})
 			success=false;
-			id=self['_id'] || self[:_id] # get the string version first, since mongo stores/returns it that way
+			id=self[:_id]
 			if id.nil?
 				db_insert(self, options)
 				success=true
