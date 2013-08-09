@@ -1,3 +1,4 @@
+# todo - fix the includes and references
 require './Mongooz.rb'
 require 'active_support/core_ext/hash/indifferent_access'
 
