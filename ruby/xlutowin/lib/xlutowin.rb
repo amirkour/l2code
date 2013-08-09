@@ -52,17 +52,18 @@ module XLUTOWIN
 						col_headers << header.gsub(/\s+/,"_").downcase.intern
 					end
 					next
-				else
-					line_hash={}
-					line_columns.each_index do |i|
-						line_hash[col_headers[i]] = line_columns[i]
-					end
+				end
 
-					if block
-						block.call(line_hash)
-					else
-						rows_as_hashes << line_hash
-					end
+				line_hash={}
+				line_columns.each_index do |i|
+					col_value=line_columns[i].strip
+					line_hash[col_headers[i]]=(col_value.empty?) ? nil : col_value
+				end
+
+				if block
+					block.call(line_hash)
+				else
+					rows_as_hashes << line_hash
 				end
 			end
 		end
