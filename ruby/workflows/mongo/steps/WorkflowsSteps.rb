@@ -23,7 +23,7 @@ module WorkflowsSteps
 						end
 
 		# your module has to define this method, and it's expected
-		# to return a list of objects deriving from WorkflowsSteps::DefaultVerification
+		# to return a list of objects that implement validates?(WorkflowHash)
 		module_to_ret.get_steps
 	end
 
