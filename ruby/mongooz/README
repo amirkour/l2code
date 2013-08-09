@@ -1,0 +1,15 @@
+mongooz provides quick-n-easy mongo hashes: CRUD ops on the ruby mongo driver in the form of a HashWithIndifferentAccess.
+
+class CoolClass < Mongooz::MongoozHash
+end
+
+a=CoolClass.new
+a[:foo]='bar'
+a.db_save
+
+you now have a collection called 'coolclass' in the 'test' mongo database being hosted on localhost:27017.  you can change that like so:
+
+Mongooz.defaults :db=>'cooldb', :host=>'coolhost', :port=>123123
+a.db_save
+
+now you have a collection called 'coolclass' in the 'cooldb' mongo databased being hosted on coolhost:123123.
