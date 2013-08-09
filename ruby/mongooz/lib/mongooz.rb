@@ -81,7 +81,7 @@ module Mongooz
 			end
 
 			def typified_result_hash_or_nil(hash_to_wrap)
-				return nil unless hash_to_wrap.kind_of?(HashWithIndifferentAccess)
+				return nil unless hash_to_wrap.kind_of?(Hash)
 				self.new.update(hash_to_wrap)
 			end
 
