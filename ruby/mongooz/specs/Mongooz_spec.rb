@@ -1,3 +1,7 @@
+# todo
+# i'm totally busted right now, please fix me
+# (i was moved from the workflows folder and stuffed into the 'specs' subfolder of the mongooz gem
+# w/o being cleaned)
 require './Mongooz.rb'
 require 'mongo'
 include Mongo
