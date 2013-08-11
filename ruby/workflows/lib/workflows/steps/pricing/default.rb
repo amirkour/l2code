@@ -16,7 +16,7 @@ module Workflows
 					raise "Pricing workflow verifications cannot validate nil item" if item_to_validate.nil?
 					raise "Pricing workflow verifications cannot validate non-workflow items" unless item_to_validate.kind_of?(Workflows::WorkflowBase)
 					raise "Pricing workflow verifications cannot validate non-pricing items" unless item_to_validate[:type]=='pricing'
-					validates_delegate(item_to_validate)
+					validates_pricing(item_to_validate)
 				end
 
 				# implement this function in your pricing verification steps
