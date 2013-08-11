@@ -1,13 +1,6 @@
-# todo - fix the includes and references
-require './Workflows.rb'
-require './status/WorkflowsStatus.rb'
-include Workflows
-
-
-# contains all workflow objects
 module Workflows
 
-	class WorkflowTypes < WorkflowHash
+	class WorkflowTypes < Workflows::WorkflowBase
 
 		alias_method :original_db_save, :db_save
 		def db_save(options={})
@@ -39,7 +32,7 @@ module Workflows
 		# TODO - each_step function and integration w/ WorkflowsSteps.get_steps
 	end
 
-	class Workflowz < WorkflowHash
+	class Workflowz < Workflows::WorkflowBase
 		alias_method :original_db_save, :db_save
 		def db_save(options={})
 			ensure_hash_has_symbol(self, :_id)
@@ -48,7 +41,7 @@ module Workflows
 		end
 	end
 
-	class WorkflowItems < WorkflowHash
+	class WorkflowItems < Workflows::WorkflowBase
 		# TODO - integrate status mixin
 		#include WorkflowsStatus
 
