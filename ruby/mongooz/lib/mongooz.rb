@@ -222,7 +222,7 @@ module Mongooz
 			raise "Didn't get an error hash from delete api?" if err_hash.nil?
 			raise "Didn't get an error hash that was a hash object from delete api?" unless err_hash.kind_of?(Hash)
 			raise "Didn't get an error hash with an 'n' key from delete api?" unless err_hash['n']
-			return err_hash['n']
+			return err_hash['n'] > 0
 		end
 	end
 end
