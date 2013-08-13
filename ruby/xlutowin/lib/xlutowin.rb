@@ -1,14 +1,26 @@
 module XLUTOWIN
 
-	DEFAULT_EXCEL_UNICODE_ENCODING="UTF-16LE"
-	DEFAULT_ENCODING_TO_TRANSCODE_TO="Windows-1252"
+	DEFAULT_EXCEL_UNICODE_ENCODING=Encoding.find("UTF-16LE") || nil
+	DEFAULT_ENCODING_TO_TRANSCODE_TO=Encoding.find("Windows-1252") || nil
 
 	# opens the given file for reading under the assumption that it's encoded in utf-16le and has a BOM to that effect,
 	# transcoding to windows-1252.
 	#
 	# returns the file handle if no block given, otherwise yields the resulting file handle to the given block.
 	def self.open(excel_unicode_filename, excel_file_encoding=XLUTOWIN::DEFAULT_EXCEL_UNICODE_ENCODING, encoding_to_transcode_to=XLUTOWIN::DEFAULT_ENCODING_TO_TRANSCODE_TO, &block)
-		file=File.open(excel_unicode_filename, "r:bom|#{excel_file_encoding}:#{encoding_to_transcode_to}")
+		if(excel_file_encoding.is_a?(String))
+			encoding_name=excel_file_encoding
+			excel_file_encoding=Encoding.find(excel_file_encoding)
+			raise "Unrecognized encoding #{encoding_name}" unless excel_file_encoding
+		end
+
+		if(encoding_to_transcode_to.is_a?(String))
+			encoding_name=encoding_to_transcode_to
+			encoding_to_transcode_to=Encoding.find(encoding_to_transcode_to)
+			raise "Unrecognized encoding #{encoding_name}" unless encoding_to_transcode_to
+		end
+		
+		file=File.open(excel_unicode_filename, "r:bom|#{excel_file_encoding.to_s}:#{encoding_to_transcode_to.to_s}")
 		return file unless block
 		begin
 			block.call(file)
