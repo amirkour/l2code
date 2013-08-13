@@ -118,10 +118,9 @@ module Mongooz
 
 			def db_get_paged(options={})
 
-				max_page=100		# bugbug - configurable?
-				max_page_size=25    # bugbug - configurable?
+				max_page_size=100    # bugbug - configurable?
 				page=options[:page] || 0
-				raise "Page number must be a non-negative number not exceeding #{max_page}" unless page >= 0 && page < max_page
+				raise "Page number must be a non-negative number" unless page >= 0
 
 				page_size=options[:page_size] || max_page_size # bugbug - configurable?
 				raise "Page size must be a positive number not exceeding #{max_page_size}" unless(page_size <= max_page_size && page_size > 0)
