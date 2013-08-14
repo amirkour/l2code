@@ -16,16 +16,19 @@ module Workflows
 					raise "Pricing workflow verifications cannot validate nil item" if item_to_validate.nil?
 					raise "Pricing workflow verifications cannot validate non-workflow items" unless item_to_validate.kind_of?(Workflows::WorkflowBase)
 					raise "Pricing workflow verifications cannot validate non-pricing items" unless item_to_validate[:type]=='pricing'
-					validates_pricing(item_to_validate)
+					validates_pricing?(item_to_validate)
 				end
 
 				# implement this function in your pricing verification steps
 				def validates_pricing?(item)
-					class_name=self.class.name || "unknown pricing verification class"
-					raise "Pricing verification #{class_name} has not implemented delegate validation function"
+					raise "Pricing verification #{self.name} has not implemented delegate validation function"
 
 					# in your implementation, you're gonna wanna return true or false to indicate
 					# whether the given item validates or not
+				end
+
+				def name
+					self.class.name.split("::").last
 				end
 			end
 		end
