@@ -116,8 +116,8 @@ module Mongooz
 				typified_result_hash_or_nil(result)
 			end
 
-			def db_get_paged(options={})
-
+			def db_get_paged(query={}, options={})
+				query={} unless query.kind_of?(Hash)
 				max_page_size=100    # bugbug - configurable?
 				page=options[:page] || 0
 				raise "Page number must be a non-negative number" unless page >= 0
@@ -137,7 +137,7 @@ module Mongooz
 					# col.find({:value=>{:$gte=>30}}, {:limit=>20,:sort=>{:value=>:asc}}).each{|x| puts x}
 
 					# this is a lot easier to maintain, off the bat.  seeking is also really inefficient as you get up there in pages
-					cursor=col.find( {}, {:limit => page_size, :skip=>num_to_skip})
+					cursor=col.find( query, {:limit => page_size, :skip=>num_to_skip})
 					cursor.each do |next_result|
 						typed_result=typified_result_hash_or_nil(next_result)
 						results << typed_result if typed_result
