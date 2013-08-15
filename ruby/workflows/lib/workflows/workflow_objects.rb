@@ -29,7 +29,27 @@ module Workflows
 			wf
 		end
 
-		# TODO - each_step function and integration w/ WorkflowsSteps.get_steps
+		def each_step(name_of_first_step=nil, &block)
+			raise "Cannot get steps for a workflow type w/ no _id" unless self[:_id]
+			
+			steps=Workflows::Steps.get_steps(self[:_id])
+			raise "No steps available for workflow #{self[:_id]}" unless steps && steps.count > 0
+
+			if name_of_first_step
+				while steps.count > 0 && steps[0].name!=name_of_first_step
+					steps.shift
+				end
+
+				if steps.count <= 0 || steps[0].name!=name_of_first_step
+					raise "Workflow #{self[:_id]} did not have a step with name #{name_of_first_step}"
+				end
+			end
+
+			return steps unless block
+			steps.each do |next_step|
+				block.call(next_step)
+			end
+		end
 	end
 
 	class Workflowz < Workflows::WorkflowBase
