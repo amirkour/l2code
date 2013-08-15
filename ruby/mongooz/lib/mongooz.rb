@@ -155,44 +155,36 @@ module Mongooz
 			options[:port]=options[:port] || Mongooz.DEFAULT_PORT
 		end
 
-		def db_insert(raw_hash, options={})
+		def db_insert(options={})
 			set_db_options(options)
 			id=nil
 			Mongooz::Base.collection(options) do |col|
-				id=col.insert(raw_hash)
+				id=col.insert(self)
 			end
 
 			id
 		end
 
 		# probably not very useful - most of your update APIs should be targeted for performance.
-		# this one will "replace" the given id with the given raw_hash.
+		# this one will "replace" the given id with the contents of self.
 		# you can use this API for upserts too, just pass :upsert=>true in the options hash.
 		# behavior will differ on the upsert depending on whether or not the given id exists.
-		def db_update(id, raw_hash, options={})
+		def db_update(options={})
+			do_upsert=options[:upsert]==true
+			if self[:_id].nil? && !do_upsert
+				raise "Cannot save w/o :_id hash param"
+			end
+
 			set_db_options(options)
 			err_hash=nil
 			Mongooz::Base.collection(options) do |col|
-				err_hash=col.update({:_id=>id}, raw_hash, options)
+				err_hash=col.update({:_id=>self[:_id]}, self, options)
 			end
 
-			err_hash
-		end
-
-
-		def db_save(options={})
-			success=false;
-			id=self[:_id]
-			if id.nil?
-				db_insert(self, options)
-				success=true
-			else
-				options[:upsert]=true
-				err_hash=db_update(id, self, options)
-				success=err_hash['n'].to_i > 0
-			end
-
-			success
+			raise "Didn't get an error hash from update api?" if err_hash.nil?
+			raise "Didn't get an error hash that was a hash object from update api?" unless err_hash.kind_of?(Hash)
+			raise "Didn't get an error hash with an 'n' key from update api?" unless err_hash['n']
+			return err_hash['n'] > 0
 		end
 
 		# deletes everything matching delete_query from a collection.
