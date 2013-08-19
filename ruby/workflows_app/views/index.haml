@@ -1,0 +1,17 @@
+%h2 ... and this one is in the route index.haml
+%div 
+	which is located here:
+	=__FILE__
+%p
+	I got a local:
+	=foo
+%p
+	and i'm also testing bootstrap icons:
+	%i.icon-search
+
+%h3 haml config options
+%table
+	-Haml::Options.defaults.each do |key,value|
+		%tr
+			%td=key
+			%td=value

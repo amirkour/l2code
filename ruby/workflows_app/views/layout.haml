@@ -1,0 +1,21 @@
+!!!
+-#
+	this is upposedly a comment ...
+
+%html
+	%head
+		-# <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" charset="utf-8" />
+		%link{:rel=>'stylesheet',
+			  :href=>'css/bootstrap/bootstrap.min.css',
+			  :type=>'text/css'}
+		%script{:type=>'text/javascript',
+				:src=>'js/jquery/jquery.min.js'}
+	%body
+		%h1 
+			This title is in the layout...
+		%div
+			which is located here:
+			=__FILE__
+
+		%div
+			=yield
