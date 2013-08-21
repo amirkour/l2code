@@ -1,1 +1,26 @@
 %h2 this is your index file
+
+%input#coolBox{:type=>"text"}
+%button.btn{"data-bind"=>"click: save"}
+	save
+%hr
+Foo value is: 
+%span{"data-bind"=>"text: foo"}
+
+%div
+	%a{:href=>url("/foo")} this'll return straight up json hash
+%div
+	%a{:href=>url("/bar")} this'll return json w/ error 400
+%div
+	%a{:href=>url("/baz")} this'll return index.haml w/ 400
+
+:javascript
+	var vm=function(){
+		var self = this;
+		self.foo = ko.observable('');
+		self.save = function(){
+			self.foo($("input#coolBox").val());
+		}
+	};
+
+	ko.applyBindings(new vm());
