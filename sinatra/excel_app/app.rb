@@ -1,15 +1,41 @@
 require 'sinatra'
 require 'sinatra/reloader'
 require 'sinatra/json'
+require 'mongooz'
+
+class FooBar<Mongooz::MongoozHash
+end
+
+# my first (shitty) piece of rack middleware!
+class Midz
+	def initialize(app,*args,&bl)
+		@app=app
+		@envstr=args[0] || "no string was provided to the ctor of Midz"
+		yield if bl
+	end
+
+	def call(env)
+		env["foo"]="barz"
+		env["fooz"]=@envstr if @envstr
+		@app.call(env)
+	end
+end
+
+use Midz do
+	puts "hi there, from midz init block" # should get called once when the server fires up
+end
 
 
 # this'll catch all 400s you try to return.
 # the bad thing is, if you try to return 400 from a json
 # endpoint, you'll still invoke this on the status code
 # and you'll really piss off the browser ...
+#
 # error 400 do
 # 	haml :error404
 # end
+
+
 
 # return an error code?
 get '/baz' do
@@ -32,5 +58,7 @@ get '/foo' do
 end
 
 get '/' do
+	@foobars=FooBar.db_get_paged
+	@foobars=[] if @foobars.nil?
 	haml :index
 end

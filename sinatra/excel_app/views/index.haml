@@ -1,11 +1,4 @@
-%h2 this is your index file
 
-%input#coolBox{:type=>"text"}
-%button.btn{"data-bind"=>"click: save"}
-	save
-%hr
-Foo value is: 
-%span{"data-bind"=>"text: foo"}
 
 %div
 	%a{:href=>url("/foo")} this'll return straight up json hash
@@ -13,14 +6,24 @@ Foo value is:
 	%a{:href=>url("/bar")} this'll return json w/ error 400
 %div
 	%a{:href=>url("/baz")} this'll return index.haml w/ 400
+%hr
 
-:javascript
-	var vm=function(){
-		var self = this;
-		self.foo = ko.observable('');
-		self.save = function(){
-			self.foo($("input#coolBox").val());
-		}
-	};
+%h2 Foobars - Lots of 'em
+%table.table
+	%thead
+		%tr
+			%th
+				In
+			%th
+				Out
+	%tbody
+		-@foobars.each do |foobar|
+			%tr
+				%td=foobar[:name]
+		%tr#new_row
+			%td
+				%input#new_in{:type=>"checkbox",:name=>"new_in"}
+			%td
+				%input#new_out{:type=>"checkbox",:name=>"new_out"}
 
-	ko.applyBindings(new vm());
+
