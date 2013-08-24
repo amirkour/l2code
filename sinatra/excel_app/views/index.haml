@@ -11,11 +11,12 @@
 			%tbody{"data-bind"=>"foreach: list"}
 				%tr
 					%td
-						%input{"data-bind"=>"value: fname, valueUpdate:'afterkeydown'"}
+						%input{:type=>"text", "data-bind"=>"value: fname, valueUpdate:'afterkeydown', event: {keyup: makedirty}"}
 					%td
-						%input{"data-bind"=>"value: lname, valueUpdate:'afterkeydown'"}
+						%input{:type=>"text", "data-bind"=>"value: lname, valueUpdate:'afterkeydown', event: {keyup: makedirty}"}
 					%td
-						%button.btn-primary{"data-bind"=>"click: save"} Save!
+						%button.btn.btn-primary{:type=>"button", "data-bind"=>"click: save, visible: dirty, css: { disabled: ajaxPending }, disable: ajaxPending"} Save Changes
+
 
 :javascript
 	(function($,ko,undefined){
@@ -27,6 +28,15 @@
 			self._id=newModelJson._id;
 			self.fname=ko.observable(newModelJson.fname);
 			self.lname=ko.observable(newModelJson.lname);
+			self.errors=ko.observableArray();// todo - INTEGRATE ME
+			self.dirty=ko.observable(false);
+			self.ajaxPending=ko.observable(false);
+			self.makedirty=function(){
+				self.dirty(true);
+			}
+			self.isdirty=function(){
+				return self.dirty();
+			}
 
 			self.JSON=function(){
 				return {
@@ -34,17 +44,18 @@
 					fname: self.fname(),
 					lname: self.lname()
 				};
-			}
+			};
 
 			self.save=function(){
-
+				self.ajaxPending(true);
 				$.ajax({
 					type:"PUT",
 					url:"/service/oem/in",
 					data: self.JSON(),
 					dataType: "json",
 					success: function(data){
-						alert("successful");
+						self.errors.removeAll();
+						self.dirty(false);
 					},
 					error: function(jqXHR, strStatus, strError){
 						error=null;
@@ -54,8 +65,12 @@
 							error={error:"Unknown error"};
 						}
 						
-						alert(JSON.stringify(error));
+						self.errors.removeAll();
+						self.errors.push(error);
 					}
+				})
+				.done(function(){
+					self.ajaxPending(false);
 				});
 			};
 		};
