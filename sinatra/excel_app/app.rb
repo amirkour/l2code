@@ -3,8 +3,17 @@ require 'sinatra/reloader'
 require 'sinatra/json'
 require 'mongooz'
 
-class FooBar<Mongooz::MongoozHash
+Mongooz.defaults :db=>'oem_agreements'
+
+configure :production do
+	puts "in prod"
 end
+configure :development do
+	puts "in dev"
+end
+
+
+require './oem_in.rb'
 
 # my first (shitty) piece of rack middleware!
 class Midz
@@ -38,27 +47,25 @@ end
 
 
 # return an error code?
-get '/baz' do
-	status 400
-	haml :error404
-	# if the 404 handler above was enabled, you'd be able to just return the integer 400 here
-	# and it'd take care of the rest ...
-end
+# get '/baz' do
+# 	status 400
+# 	haml :error404
+# 	# if the 404 handler above was enabled, you'd be able to just return the integer 400 here
+# 	# and it'd take care of the rest ...
+# end
 
-# return an error code and msg?
-# ... and json?
-get '/bar' do
-	status 400
-	json :foo=>'bar'
-end
+# # return an error code and msg?
+# # ... and json?
+# get '/bar' do
+# 	status 400
+# 	json :foo=>'bar'
+# end
 
-# return json? - this requires sinatra/json above (and gem install sinatra-contrib)
-get '/foo' do
-	json :foo=>'bar'
-end
+# # return json? - this requires sinatra/json above (and gem install sinatra-contrib)
+# get '/foo' do
+# 	json :foo=>'bar'
+# end
 
 get '/' do
-	@foobars=FooBar.db_get_paged
-	@foobars=[] if @foobars.nil?
 	haml :index
 end

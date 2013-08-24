@@ -1,29 +1,33 @@
+#main.foo
+	%button#postTestButton post test
+	%hr
+	%textarea#results
+	%hr
+	%button#getTestButton get test
+	%hr
+	%textarea#getResults
 
+:javascript
+	var iCounter=0;
+	var pTest={
+		_id:"newName"
+	};
+	$("button#postTestButton").click(function(e){
+		$.post("/service/oem/in", pTest, function(data){
+				$("textarea#results").text(JSON.stringify(data));
+		}, "json")
+		.fail(function(jqXHR, strStatus, strError){
+			error=null;
+			try{
+				error=JSON.parse(jqXHR.responseText);
+			}catch(e){
+				error={error:"Unknown error"};
+			}
+			
+			alert(JSON.stringify(error));
+		});
+	});
 
-%div
-	%a{:href=>url("/foo")} this'll return straight up json hash
-%div
-	%a{:href=>url("/bar")} this'll return json w/ error 400
-%div
-	%a{:href=>url("/baz")} this'll return index.haml w/ 400
-%hr
-
-%h2 Foobars - Lots of 'em
-%table.table
-	%thead
-		%tr
-			%th
-				In
-			%th
-				Out
-	%tbody
-		-@foobars.each do |foobar|
-			%tr
-				%td=foobar[:name]
-		%tr#new_row
-			%td
-				%input#new_in{:type=>"checkbox",:name=>"new_in"}
-			%td
-				%input#new_out{:type=>"checkbox",:name=>"new_out"}
-
-
+	$("button#getTestButton").click(function(e){
+		//$.getJSON()
+	});
