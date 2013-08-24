@@ -22,3 +22,47 @@ post '/service/oem/in' do
 
 	json response
 end
+
+put '/service/oem/in' do
+	response=OEMIn.new
+	response.update(params)
+
+	if response[:_id].nil?
+		status 400
+		break json({:error=>"Cannot update without _id param"})
+	end
+
+	# when we serialize mongo objects to json, BSON IDs end up looking like
+	# this in javascript land:
+	# {_id: {"$oid":"123123123"}}
+	#
+	# if we detect a hash as the ID, we'll attempt to parse BSON out of it
+	# and use that for the ID when we update
+	if response[:_id].kind_of?(Hash)
+		if response[:_id]["$oid"].nil?
+			status 400
+			break json({:error=>"Expected _id hash to have an $oid property"})
+		end
+
+		begin
+			response[:_id]=BSON::ObjectId(response[:_id]["$oid"])
+		rescue
+			status 400
+			break json({:error=>"Could not parse $oid of _id to bson"})
+		end
+	end
+
+	begin
+		if response.db_update
+			response={:success=>true}
+		else
+			status 400
+			response={:error=>"Failed to update"}
+		end
+	rescue Exception=>e
+		status 400
+		response={:error=>e.message}
+	end
+
+	json response
+end
