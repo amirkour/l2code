@@ -1,33 +1,101 @@
-#main.foo
-	%button#postTestButton post test
-	%hr
-	%textarea#results
-	%hr
-	%button#getTestButton get test
-	%hr
-	%textarea#getResults
+#oemInDIV
+	%h3 OEM In
+	-if @oem_in_list.nil? || @oem_in_list.length <= 0
+		%span No items to display
+	-else
+		%table.table
+			%thead
+				%tr
+					%th fname
+					%th lname
+			%tbody{"data-bind"=>"foreach: list"}
+				%tr
+					%td
+						%input{"data-bind"=>"value: fname, valueUpdate:'afterkeydown'"}
+					%td
+						%input{"data-bind"=>"value: lname, valueUpdate:'afterkeydown'"}
+					%td
+						%button.btn-primary{"data-bind"=>"click: save"} Save!
 
 :javascript
-	var iCounter=0;
-	var pTest={
-		_id:"newName"
-	};
-	$("button#postTestButton").click(function(e){
-		$.post("/service/oem/in", pTest, function(data){
-				$("textarea#results").text(JSON.stringify(data));
-		}, "json")
-		.fail(function(jqXHR, strStatus, strError){
-			error=null;
-			try{
-				error=JSON.parse(jqXHR.responseText);
-			}catch(e){
-				error={error:"Unknown error"};
-			}
-			
-			alert(JSON.stringify(error));
-		});
-	});
+	(function($,ko,undefined){
+		var bootstrappedOEMInJSONList=#{@oem_in_list.to_json};
 
-	$("button#getTestButton").click(function(e){
-		//$.getJSON()
-	});
+		var OEMInModel=function(newModelJson){
+			// todo - some validation of the JSON maybe ...
+			var self=this;
+			self._id=newModelJson._id;
+			self.fname=ko.observable(newModelJson.fname);
+			self.lname=ko.observable(newModelJson.lname);
+
+			self.JSON=function(){
+				return {
+					_id: self._id,
+					fname: self.fname(),
+					lname: self.lname()
+				};
+			}
+
+			self.save=function(){
+
+				$.ajax({
+					type:"PUT",
+					url:"/service/oem/in",
+					data: self.JSON(),
+					dataType: "json",
+					success: function(data){
+						alert("successful");
+					},
+					error: function(jqXHR, strStatus, strError){
+						error=null;
+						try{
+							error=JSON.parse(jqXHR.responseText);
+						}catch(e){
+							error={error:"Unknown error"};
+						}
+						
+						alert(JSON.stringify(error));
+					}
+				});
+			};
+		};
+
+		var OEMInViewModel=function(initialJSONList){
+			this.list=ko.observableArray();
+
+			for(var i=0, iLen=initialJSONList.length; i<iLen; i++){
+				this.list.push(new OEMInModel(initialJSONList[i]));
+			}
+
+			this.save=function(){
+				alert('hi');
+			}
+		};
+
+		ko.applyBindings(new OEMInViewModel(bootstrappedOEMInJSONList));
+
+		// var iCounter=0;
+		// var pTest={
+		// 	fname:"new first name",
+		// 	lname:"new last name"
+		// };
+		// $("button#postTestButton").click(function(e){
+		// 	$.post("/service/oem/in", pTest, function(data){
+		// 			$("textarea#results").text(JSON.stringify(data));
+		// 	}, "json")
+		// 	.fail(function(jqXHR, strStatus, strError){
+		// 		error=null;
+		// 		try{
+		// 			error=JSON.parse(jqXHR.responseText);
+		// 		}catch(e){
+		// 			error={error:"Unknown error"};
+		// 		}
+				
+		// 		alert(JSON.stringify(error));
+		// 	});
+		// });
+
+		// $("button#getTestButton").click(function(e){
+		// 	//$.getJSON()
+		// });
+	})(jQuery,ko);

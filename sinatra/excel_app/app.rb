@@ -67,5 +67,6 @@ end
 # end
 
 get '/' do
+	@oem_in_list=OEMIn.db_get_paged || []
 	haml :index
 end
