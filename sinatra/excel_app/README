@@ -1,1 +1,3 @@
-Simulate a (very dumb, very basic) excel spreadsheet using knockout.js, haml, sinatra, mongodb.
+L2Knockout!
+
+Simulates a (very dumb, very basic) excel spreadsheet using knockout.js, twitter bootstrap, haml, sinatra, mongodb.
