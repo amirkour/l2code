@@ -32,12 +32,11 @@ put '/service/oem/in' do
 		break json({:error=>"Cannot update without _id param"})
 	end
 
-	# when we serialize mongo objects to json, BSON IDs end up looking like
+	# when mongo objects serialize out to json, BSON IDs end up looking like
 	# this in javascript land:
 	# {_id: {"$oid":"123123123"}}
 	#
-	# if we detect a hash as the ID, we'll attempt to parse BSON out of it
-	# and use that for the ID when we update
+	# will attempt to parse bson out of the _id key if it's a hash
 	if response[:_id].kind_of?(Hash)
 		if response[:_id]["$oid"].nil?
 			status 400

@@ -3,12 +3,19 @@
 	-if @oem_in_list.nil? || @oem_in_list.length <= 0
 		%span No items to display
 	-else
-		%table.table
+		%table.with_clean_inputs
 			%thead
 				%tr
 					%th fname
 					%th lname
+					%th
 			%tbody{"data-bind"=>"foreach: list"}
+				%tr{"data-bind"=>"if: errors().length>0"}
+					%td{:colspan=>3}
+						.alert.alert-error{:style=>"margin-bottom:0px;margin-top:5px;"}
+							%ul{"data-bind"=>"foreach: errors"}
+								%li
+									%span{"data-bind"=>"text: $data.error"}
 				%tr
 					%td
 						%input{:type=>"text", "data-bind"=>"value: fname, valueUpdate:'afterkeydown', event: {keyup: makedirty}"}
@@ -16,6 +23,7 @@
 						%input{:type=>"text", "data-bind"=>"value: lname, valueUpdate:'afterkeydown', event: {keyup: makedirty}"}
 					%td
 						%button.btn.btn-primary{:type=>"button", "data-bind"=>"click: save, visible: dirty, css: { disabled: ajaxPending }, disable: ajaxPending"} Save Changes
+						%span{"data-bind"=>"visible: ajaxPending"} busy ...
 
 
 :javascript
@@ -28,14 +36,12 @@
 			self._id=newModelJson._id;
 			self.fname=ko.observable(newModelJson.fname);
 			self.lname=ko.observable(newModelJson.lname);
-			self.errors=ko.observableArray();// todo - INTEGRATE ME
+			self.errors=ko.observableArray();
 			self.dirty=ko.observable(false);
 			self.ajaxPending=ko.observable(false);
+			
 			self.makedirty=function(){
 				self.dirty(true);
-			}
-			self.isdirty=function(){
-				return self.dirty();
 			}
 
 			self.JSON=function(){
@@ -64,12 +70,13 @@
 						}catch(e){
 							error={error:"Unknown error"};
 						}
-						
+					
+							
 						self.errors.removeAll();
 						self.errors.push(error);
 					}
 				})
-				.done(function(){
+				.always(function(){
 					self.ajaxPending(false);
 				});
 			};
