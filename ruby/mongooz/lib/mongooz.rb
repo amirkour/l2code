@@ -85,6 +85,21 @@ module Mongooz
 				self.new.update(hash_to_wrap)
 			end
 
+			def db_query(query={},query_opts={},options={})
+				query={} unless query.kind_of?(Hash)
+				query_opts={} unless query_opts.kind_of?(Hash)
+				set_db_options(options)
+				results=[]
+				Mongooz::Base.collection(options) do |col|
+					col.find(query,query_opts).each do |next_result|
+						typed_result=typified_result_hash_or_nil(next_result)
+						results << typed_result if typed_result
+					end
+				end
+
+				results
+			end
+
 			def db_get_with_id(options={})
 				id=options[:_id]
 				raise "Missing required :_id options parameter" unless id
