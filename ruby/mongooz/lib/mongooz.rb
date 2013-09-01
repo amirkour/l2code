@@ -7,12 +7,18 @@ module Mongooz
 	@DEFAULT_DB='test'
 	@DEFAULT_HOST='localhost'
 	@DEFAULT_PORT=27017
+	@DEFAULT_USER=nil
+	@DEFAULT_PASSWORD=nil
+
 	class << self
-		attr_reader :DEFAULT_DB, :DEFAULT_HOST, :DEFAULT_PORT
+		attr_reader :DEFAULT_DB, :DEFAULT_HOST, :DEFAULT_PORT, :DEFAULT_USER, :DEFAULT_PASSWORD
 		def defaults(options={})
 			@DEFAULT_DB=options[:db] if options[:db]
 			@DEFAULT_HOST=options[:host] if options[:host]
 			@DEFAULT_PORT=options[:port] if options[:port]
+			@DEFAULT_USER=options[:user] if options[:user]
+			@DEFAULT_PASSWORD=options[:password] if options[:password]
+			{:host=>@DEFAULT_HOST, :port=>@DEFAULT_PORT, :db=>@DEFAULT_DB, :user=>@DEFAULT_USER, :password=>@DEFAULT_PASSWORD}
 		end
 	end
 
@@ -35,9 +41,13 @@ module Mongooz
 				db_host=options[:host] || Mongooz.DEFAULT_HOST
 				db_port=options[:port] || Mongooz.DEFAULT_PORT
 				db_name=options[:db] || Mongooz.DEFAULT_DB
+				db_user=options[:user] || Mongooz.DEFAULT_USER
+				db_password=options[:password] || Mongooz.DEFAULT_PASSWORD
 
 				client=Mongooz::Base::client({:host => db_host, :port => db_port})
-				return client[db_name] unless block
+				db_to_ret=client[db_name]
+				db_to_ret.authenticate(db_user,db_password) if db_user && db_password
+				return db_to_ret unless block
 				begin
 					block.call(client[db_name])
 				ensure
@@ -187,7 +197,7 @@ module Mongooz
 		def db_update(options={})
 			do_upsert=options[:upsert]==true
 			if self[:_id].nil? && !do_upsert
-				raise "Cannot save w/o :_id hash param"
+				raise "Cannot update w/o :_id hash param"
 			end
 
 			set_db_options(options)
