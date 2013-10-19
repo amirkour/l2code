@@ -1,11 +1,19 @@
-div#left
+div#multi-column
 {
-	float: left;
-	width:340px;
-}
-div#right
-{
-	margin-left:350px;
+	/* number of columns the browser should evenly break things up into */
+	-moz-column-count:2; /* Firefox */
+	-webkit-column-count:2; /* Safari and Chrome */
+	column-count:2;
+
+	/* distance b/w columns */
+	-moz-column-gap:20px; /* Firefox */
+	-webkit-column-gap:20px; /* Safari and Chrome */
+	column-gap:20px;
+
+	/* the delineation marker b/w columns - "outset" could also be "inset" or "ridge" etc ...*/
+	-moz-column-rule:3px outset gray; /* Firefox */
+	-webkit-column-rule:3px outset gray; /* Safari and Chrome */
+	column-rule:3px outset gray;
 }
 div.demo
 {
@@ -48,7 +56,6 @@ div#with-resized-percentage-img
 
 div#with-img-in-padding-box
 {
-	display: inline-block;
 	color: red;
 	background:url(img.jpg);
 	background-repeat:no-repeat;
@@ -59,7 +66,6 @@ div#with-img-in-padding-box
 }
 div#with-img-in-content-box
 {
-	display: inline-block;
 	color: red;
 	background:url(img.jpg);
 	background-repeat:no-repeat;
@@ -168,7 +174,6 @@ div#transition:hover
 /* and this div will bind to the animation: */
 div#animated
 {
-	display:inline-block;
 	animation: myfirst 3s; /* will animate over 3s */
 	animation-iteration-count: infinite;
 	-webkit-animation: myfirst 3s; /* same thing, for safari and chrome */
@@ -187,7 +192,6 @@ div#animated
 
 div#animated-rotating
 {
-	display:inline-block;
 	animation:rotate 6s;
 	animation-iteration-count: infinite linear;
 	-webkit-animation: rotate 6s linear;
