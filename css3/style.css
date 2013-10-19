@@ -1,0 +1,196 @@
+div#left
+{
+	float: left;
+	width:340px;
+}
+div#right
+{
+	margin-left:350px;
+}
+div.demo
+{
+	width:120px;
+	height:120px;
+	text-align:center;
+	border: 2px solid black;
+}
+div#rotated_30_degrees
+{
+	background-color: red;
+	transform:rotate(30deg);
+	-ms-transform:rotate(30deg); /* IE 9 */
+	-webkit-transform:rotate(30deg); /* Safari and Chrome */
+}
+
+div#with-round-edges
+{
+	border-radius: 25px;
+}
+
+div#with-box-shadow
+{
+	box-shadow: 10px 10px 5px #888888;
+}
+
+div#with-resized-img
+{
+	background:url(img.jpg);
+	background-size:80px 60px;
+	background-repeat:no-repeat;
+}
+
+div#with-resized-percentage-img
+{
+	background:url(img.jpg);
+	background-size:100% 100%;
+	background-repeat:no-repeat;
+}
+
+div#with-img-in-padding-box
+{
+	display: inline-block;
+	color: red;
+	background:url(img.jpg);
+	background-repeat:no-repeat;
+	background-size:50px 50px;		/* explicit width/height */
+	background-origin:padding-box;	/* this puts the img in the 'padding' section */
+	background-position: left;		/* explicit positioning centers it on the left */
+	padding-left:35px;				/* explicit padding, w/ respect to img's size. make this 50px for perfection! */
+}
+div#with-img-in-content-box
+{
+	display: inline-block;
+	color: red;
+	background:url(img.jpg);
+	background-repeat:no-repeat;
+	background-size:50px 50px;		/* explicit width/height */
+	background-origin:content-box;	/* this puts the img in the 'content' section (which is the default) */
+	background-position: left;		/* explicit positioning centers it on the left */
+	padding-left:35px;				/* explicit padding, w/ respect to img's size. make this 50px for perfection! */
+}
+
+div#with-multiple-images
+{
+	background:url(bla-text.png),url(img.jpg);
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+}
+div#gradient-linear-t-to-b
+{
+	color:white;
+	background: -webkit-linear-gradient(red, blue); /* For Safari */
+	background: -o-linear-gradient(red, blue); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(red, blue); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(red, blue); /* Standard syntax */
+}
+div#gradient-linear-l-to-r
+{
+	color:white;
+	background: -webkit-linear-gradient(left, red , blue); /* For Safari */
+	background: -o-linear-gradient(right, red, blue); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(right, red, blue); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(to right, red , blue); /* Standard syntax */
+}
+div#gradient-diagonal-tl-to-br
+{
+	color:white;
+	background: -webkit-linear-gradient(left top, red , blue); /* For Safari */
+	background: -o-linear-gradient(bottom right, red, blue); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(bottom right, red, blue); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(to bottom right, red , blue); /* Standard syntax */
+}
+div#gradient-angled
+{
+	color:white;
+	background: -webkit-linear-gradient(25deg, red, blue); /* For Safari */
+	background: -o-linear-gradient(25deg, red, blue); /* For Opera 11.1 to 12.0 */
+	background: -moz-linear-gradient(25deg, red, blue); /* For Firefox 3.6 to 15 */
+	background: linear-gradient(25deg, red, blue); /* Standard syntax */
+}
+div#gradient-with-transparency
+{
+	color:white;
+	background: -webkit-linear-gradient(left,rgba(255,0,0,0),rgba(255,0,0,1)); /*Safari*/
+	background: -o-linear-gradient(right,rgba(255,0,0,0),rgba(255,0,0,1)); /*Opera 11-12*/
+	background: -moz-linear-gradient(right,rgba(255,0,0,0),rgba(255,0,0,1)); /*Fx 3.6-15*/
+	background: linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1)); /*Standard*/
+}
+div#translate-2d /* translating moves the element relative to it's top/left, and widht/height (in percentages) */
+{
+	transform: translate(50%,50%);
+	-ms-transform: translate(50%,50%); /* IE 9 */
+	-webkit-transform: translate(50%,50%); /* Safari and Chrome */
+}
+div#scaled
+{
+	float:right;
+	transform: scale(2,4);
+	-ms-transform: scale(2,4); /* IE 9 */
+	-webkit-transform: scale(2,4); /* Safari and Chrome */
+}
+div#rotate-X-3d
+{
+	transform: rotateX(120deg);
+	-webkit-transform: rotateX(120deg); /* Safari and Chrome */
+}
+div#rotate-Y-3d
+{
+	transform: rotateY(130deg);
+	-webkit-transform: rotateY(130deg); /* Safari and Chrome */
+}
+div#transition
+{
+	/* when the 'width' or 'transform' css3 properties change, they'll transition to their new values over the given time periods */
+	transition:transform 1s,width 2s;
+	-webkit-transition:-webkit-transform 1s,width 2s; /* for Safari */
+	transition-timing-function: ease-in-out; /* and this is how it'll transition */
+}
+div#transition:hover
+{
+	width:150%;/* so this should transition over 2s ... */
+	transform:rotate(360deg); /* and this should transition over 1s */
+	-ms-transform:rotate(360deg); /* IE 9 */
+	-webkit-transform:rotate(360deg); /* Safari and Chrome */
+}
+@keyframes myfirst /* this is the name of the animation */
+{
+	0% {background: red;}
+	50% {background: yellow;}
+	100% {background: red;}
+}
+
+@-webkit-keyframes myfirst /* this is the name of the animation, for Safari and Chrome */
+{
+	0% {background: red;}
+	50% {background: yellow;}
+	100% {background: red;}
+}
+/* and this div will bind to the animation: */
+div#animated
+{
+	display:inline-block;
+	animation: myfirst 3s; /* will animate over 3s */
+	animation-iteration-count: infinite;
+	-webkit-animation: myfirst 3s; /* same thing, for safari and chrome */
+	-webkit-animation-iteration-count: infinite;
+}
+@keyframes rotate 
+{ 
+	0%   {transform:rotate(0deg);}
+    100% {transform:rotate(360deg);}
+}
+@-webkit-keyframes rotate 
+{ 
+	0%   {-webkit-transform:rotate(0deg);}
+    100% {-webkit-transform: rotate(360deg);} 
+}
+
+div#animated-rotating
+{
+	display:inline-block;
+	animation:rotate 6s;
+	animation-iteration-count: infinite linear;
+	-webkit-animation: rotate 6s linear;
+	-webkit-animation-iteration-count: infinite;
+}
+
