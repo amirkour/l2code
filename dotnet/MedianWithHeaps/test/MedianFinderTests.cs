@@ -149,5 +149,28 @@ namespace MedianWithHeaps.Test
             Assert.False(_finder.LeftSideOfListIsLarger);
             Assert.False(_finder.RightSideOfListIsLarger);
         }
+
+        [Fact]
+        public void AddNum_ABunchOfZeros()
+        {
+            _finder.AddNum(0);  // this should go min/right
+            Assert.True(_finder.RightSideOfListIsLarger);
+
+            _finder.AddNum(0);  // this should flip-flop 'em, so both lists are equal now
+            Assert.False(_finder.LeftSideOfListIsLarger || _finder.RightSideOfListIsLarger);
+
+            _finder.AddNum(0);  // again, min/right
+            Assert.True(_finder.RightSideOfListIsLarger);
+        }
+
+        [Theory]
+        [InlineData(new int[] { 1, 2, 3, 4, 5 }, 3.0)]
+        [InlineData(new int[] { 1, 2, 3, 4, 5, 6, 7 }, 4.0)]
+        [InlineData(new int[] { 1 }, 1.0)]
+        public void FindMedian_OddSizeList_SmokeTest(int[] numbers, double medianExpected)
+        {
+            Array.ForEach<int>(numbers, i => _finder.AddNum(i));
+            Assert.Equal(medianExpected, _finder.FindMedian());
+        }
     }
 }

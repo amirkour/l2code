@@ -72,5 +72,15 @@ namespace MedianWithHeaps
 
             return this;
         }
+
+        public double FindMedian()
+        {
+            if(this.Size == 0)
+                return 0;
+            else if(this.Size % 2 == 0)
+                return (_leftMaxHeap.Peek() + _rightMinHeap.Peek()) / 2;
+            else
+                return this.LeftSideOfListIsLarger ? _leftMaxHeap.Peek() : _rightMinHeap.Peek();
+        }
     }
 }
