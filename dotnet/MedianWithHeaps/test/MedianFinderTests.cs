@@ -164,10 +164,20 @@ namespace MedianWithHeaps.Test
         }
 
         [Theory]
-        [InlineData(new int[] { 1, 2, 3, 4, 5 }, 3.0)]
-        [InlineData(new int[] { 1, 2, 3, 4, 5, 6, 7 }, 4.0)]
+        [InlineData(new int[] { 2, 1, 5, 4, 3 }, 3.0)]
+        [InlineData(new int[] { 1, 2, 3, 7, 5, 6, 4 }, 4.0)]
         [InlineData(new int[] { 1 }, 1.0)]
         public void FindMedian_OddSizeList_SmokeTest(int[] numbers, double medianExpected)
+        {
+            Array.ForEach<int>(numbers, i => _finder.AddNum(i));
+            Assert.Equal(medianExpected, _finder.FindMedian());
+        }
+
+        [Theory]
+        [InlineData(new int[] { 5, 4, 3, 2, 1, 6 }, 3.5)]
+        [InlineData(new int[] { 7, 5, 3, 4, 2, 6, 1, 8 }, 4.5)]
+        [InlineData(new int[] { 1, 2 }, 1.5)]
+        public void FindMedian_EvenSizeList_SmokeTest(int[] numbers, double medianExpected)
         {
             Array.ForEach<int>(numbers, i => _finder.AddNum(i));
             Assert.Equal(medianExpected, _finder.FindMedian());
